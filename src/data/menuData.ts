@@ -25,6 +25,7 @@ export interface MenuItem {
   cashbackNote?: string;
   badge?: string;
   tag: string;
+  imageUrl?: string;
 }
 
 export interface DayInfo {

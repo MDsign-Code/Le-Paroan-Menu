@@ -3,6 +3,7 @@ import { CartItem, OrderCustomerInfo, PaymentMethod, OrderMethod } from '../type
 import { formatRupiah } from '../utils/qrisGenerator';
 import { X, Trash2, ShoppingBag, ArrowRight, QrCode, Banknote, Sparkles, AlertCircle } from 'lucide-react';
 import { WHATSAPP_NUMBER } from '../data/menuData';
+import { MENU_IMAGES } from '../data/menuImages';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -134,34 +135,45 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   <h3 className="text-xs font-bold uppercase tracking-wider text-stone-400">
                     Menu Dipilih
                   </h3>
-                  {cartItems.map((item) => (
-                    <div
-                      key={item.cartItemId}
-                      className="bg-white border border-[#E8DFD3] rounded-2xl p-4 shadow-2xs space-y-2.5"
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <h4 className="text-sm font-bold text-stone-900 leading-snug">
-                            {item.item.name}
-                          </h4>
-                          {item.selectedVariant && (
-                            <div className="text-xs text-[#E86014] font-medium mt-0.5">
-                              {item.selectedVariant}
+                  {cartItems.map((item) => {
+                    const thumb = MENU_IMAGES[item.item.id];
+                    return (
+                      <div
+                        key={item.cartItemId}
+                        className="bg-white border border-[#E8DFD3] rounded-2xl p-3.5 shadow-2xs space-y-2.5"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-start gap-2.5 min-w-0">
+                            {thumb && (
+                              <img
+                                src={thumb}
+                                alt={item.item.name}
+                                className="w-12 h-12 rounded-lg object-cover shrink-0 border border-stone-100"
+                              />
+                            )}
+                            <div className="min-w-0">
+                              <h4 className="text-xs sm:text-sm font-bold text-stone-900 leading-snug line-clamp-2">
+                                {item.item.name}
+                              </h4>
+                              {item.selectedVariant && (
+                                <div className="text-[11px] text-[#E86014] font-medium mt-0.5">
+                                  {item.selectedVariant}
+                                </div>
+                              )}
+                              {item.selectedOption && (
+                                <div className="text-[11px] text-stone-500">
+                                  {item.selectedOption}
+                                </div>
+                              )}
+                              {item.customerNote && (
+                                <div className="text-[10px] text-stone-500 italic mt-0.5">
+                                  Catatan: "{item.customerNote}"
+                                </div>
+                              )}
                             </div>
-                          )}
-                          {item.selectedOption && (
-                            <div className="text-xs text-stone-500">
-                              {item.selectedOption}
-                            </div>
-                          )}
-                          {item.customerNote && (
-                            <div className="text-[11px] text-stone-500 italic mt-0.5">
-                              Catatan: "{item.customerNote}"
-                            </div>
-                          )}
-                        </div>
+                          </div>
 
-                        <button
+                          <button
                           onClick={() => onRemoveItem(item.cartItemId)}
                           className="text-stone-300 hover:text-red-500 transition-colors p-1 cursor-pointer"
                           title="Hapus menu"
@@ -200,8 +212,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                         </div>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  );
+                })}
+              </div>
 
                 {/* Friday Berkah summary note if applicable */}
                 {fridayPorsiCount > 0 && (

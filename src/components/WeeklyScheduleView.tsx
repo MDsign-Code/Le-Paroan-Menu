@@ -1,6 +1,7 @@
 import React from 'react';
 import { DAYS_INFO, MENU_ITEMS, DayOfWeek } from '../data/menuData';
 import { Calendar, ArrowRight, Utensils, HeartHandshake } from 'lucide-react';
+import { MENU_IMAGES } from '../data/menuImages';
 
 interface WeeklyScheduleViewProps {
   onSelectDay: (day: DayOfWeek) => void;
@@ -63,19 +64,31 @@ export const WeeklyScheduleView: React.FC<WeeklyScheduleViewProps> = ({ onSelect
 
                   <div className="py-3 space-y-2.5">
                     {dayItems.length > 0 ? (
-                      dayItems.map((item) => (
-                        <div key={item.id} className="text-xs">
-                          <div className="text-[10px] uppercase font-bold text-[#E86014]">
-                            {item.mealLabel}
+                      dayItems.map((item) => {
+                        const thumb = MENU_IMAGES[item.id];
+                        return (
+                          <div key={item.id} className="flex items-center gap-2.5 text-xs">
+                            {thumb && (
+                              <img
+                                src={thumb}
+                                alt={item.name}
+                                className="w-10 h-10 rounded-lg object-cover shrink-0 border border-stone-100"
+                              />
+                            )}
+                            <div className="min-w-0">
+                              <div className="text-[10px] uppercase font-bold text-[#E86014]">
+                                {item.mealLabel}
+                              </div>
+                              <div className="font-semibold text-stone-800 line-clamp-1 mt-0.5">
+                                {item.name}
+                              </div>
+                              <div className="text-[11px] font-mono text-stone-500">
+                                {item.priceDisplay}
+                              </div>
+                            </div>
                           </div>
-                          <div className="font-semibold text-stone-800 line-clamp-1 mt-0.5">
-                            {item.name}
-                          </div>
-                          <div className="text-[11px] font-mono text-stone-500">
-                            {item.priceDisplay}
-                          </div>
-                        </div>
-                      ))
+                        );
+                      })
                     ) : (
                       <div className="text-xs text-stone-400 italic py-2">
                         Paket Rame-Rame &amp; Minuman
