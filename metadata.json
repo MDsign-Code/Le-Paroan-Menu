@@ -1,6 +1,6 @@
 {
-  "name": "Dapur Le'Paroan - Menu Digital & Order WhatsApp",
-  "description": "Menu digital mingguan Dapur Le'Paroan. Cita rasa Nusantara praktis setiap hari dengan pemesanan via WhatsApp dan pembayaran QRIS.",
+  "name": "Dapur Le'Paroan • Iket Ijo Bintaro - Menu Harian 21 Pilihan",
+  "description": "Menu Harian Dapur Le'Paroan Iket Ijo Bintaro. 21 Pilihan Sarapan, Makan Siang & Makan Malam siap antar Bintaro & sekitarnya. Pemesanan WhatsApp 085964245547 & QRIS.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

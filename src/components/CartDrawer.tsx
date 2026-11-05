@@ -39,10 +39,6 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
     0
   );
 
-  const fridayPorsiCount = cartItems
-    .filter((i) => i.item.day === 'jumat')
-    .reduce((sum, i) => sum + i.quantity, 0);
-
   const handleCheckout = () => {
     if (!customerInfo.name.trim()) {
       setErrorMsg('Silakan isi Nama Pemesan terlebih dahulu.');
@@ -153,23 +149,12 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                             )}
                             <div className="min-w-0">
                               <h4 className="text-xs sm:text-sm font-bold text-stone-900 leading-snug line-clamp-2">
+                                <span className="font-mono text-[#E86014] mr-1">[{item.item.code}]</span>
                                 {item.item.name}
                               </h4>
-                              {item.selectedVariant && (
-                                <div className="text-[11px] text-[#E86014] font-medium mt-0.5">
-                                  {item.selectedVariant}
-                                </div>
-                              )}
-                              {item.selectedOption && (
-                                <div className="text-[11px] text-stone-500">
-                                  {item.selectedOption}
-                                </div>
-                              )}
-                              {item.customerNote && (
-                                <div className="text-[10px] text-stone-500 italic mt-0.5">
-                                  Catatan: "{item.customerNote}"
-                                </div>
-                              )}
+                              <div className="text-[11px] font-mono text-stone-500 mt-0.5">
+                                {item.item.priceDisplay} / porsi
+                              </div>
                             </div>
                           </div>
 
@@ -216,17 +201,14 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 })}
               </div>
 
-                {/* Friday Berkah summary note if applicable */}
-                {fridayPorsiCount > 0 && (
-                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2 text-xs text-amber-900">
-                    <Sparkles className="w-4 h-4 text-[#E86014] shrink-0 mt-0.5" />
-                    <div>
-                      <span className="font-semibold text-[#E86014]">Jumat Berkah Berbagi: </span>
-                      Pesanan Anda berkontribusi donasi sosial sebesar{' '}
-                      <strong>{formatRupiah(fridayPorsiCount * 500)}</strong> ({fridayPorsiCount} porsi x Rp500).
-                    </div>
+                {/* Delivery Area note */}
+                <div className="p-3 bg-emerald-50/80 border border-emerald-200 rounded-xl flex items-start gap-2 text-xs text-emerald-950">
+                  <Sparkles className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-semibold text-emerald-800">Dapur Le'Paroan Bintaro: </span>
+                    Porsi lengkap hangat <em>Nasi • Lauk • Sayur • Sambal</em> siap antar ke seluruh area Bintaro &amp; sekitarnya.
                   </div>
-                )}
+                </div>
 
                 {/* Customer Checkout Form */}
                 <div className="space-y-4 pt-2">
@@ -245,14 +227,30 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                     {/* Customer Name */}
                     <div>
                       <label className="text-xs font-semibold text-stone-700 block mb-1">
-                        Nama Lengkap / Kantor <span className="text-red-500">*</span>
+                        Nama Pemesan / Kantor <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
-                        placeholder="Contoh: Pak Herman (Lantai 3)"
+                        placeholder="Contoh: Pak Herman (Bintaro Sektor 7)"
                         value={customerInfo.name}
                         onChange={(e) =>
                           onUpdateCustomerInfo({ name: e.target.value })
+                        }
+                        className="w-full px-3 py-2 text-xs bg-stone-50 border border-stone-200 rounded-lg text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-[#E86014]"
+                      />
+                    </div>
+
+                    {/* Affiliator / Agent Name */}
+                    <div>
+                      <label className="text-xs font-semibold text-stone-700 block mb-1">
+                        Nama Agen / Afiliator <span className="text-stone-400 font-normal">(Jika ada referensi)</span>
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Contoh: Afiliator Bintaro Jaya / kosongkan jika langsung"
+                        value={customerInfo.affiliatorName}
+                        onChange={(e) =>
+                          onUpdateCustomerInfo({ affiliatorName: e.target.value })
                         }
                         className="w-full px-3 py-2 text-xs bg-stone-50 border border-stone-200 rounded-lg text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-[#E86014]"
                       />
@@ -391,14 +389,14 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
                             <span className="text-xs font-bold text-stone-900">
-                              QRIS (Semua Bank &amp; E-Wallet)
+                              QRIS GoPay Merchant (Semua Bank &amp; E-Wallet)
                             </span>
-                            <span className="text-[10px] font-bold text-[#DF192A] bg-white px-2 py-0.5 rounded border border-[#DF192A]/30">
-                              REKOMENDASI
+                            <span className="text-[10px] font-bold text-[#008BB9] bg-cyan-50 px-2 py-0.5 rounded border border-cyan-200">
+                              GOPAY RESMI
                             </span>
                           </div>
                           <p className="text-[11px] text-stone-500 mt-0.5">
-                            BCA, Mandiri, BRI, BNI, GoPay, OVO, Dana, ShopeePay dll. Scan langsung &amp; instan.
+                            Scan via GoPay, BCA, Mandiri, BRI, BNI, OVO, DANA, dll. Aman &amp; otomatis. <em>Tidak menerima transfer manual.</em>
                           </p>
                         </div>
                       </button>

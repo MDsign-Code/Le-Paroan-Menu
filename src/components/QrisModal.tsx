@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { X, Copy, Check, QrCode, ArrowRight, ShieldCheck, Download, Smartphone } from 'lucide-react';
-import { generateQRMatrix, formatRupiah } from '../utils/qrisGenerator';
+import { X, Copy, Check, ShieldCheck, Download, Smartphone, ArrowRight, ExternalLink, ZoomIn } from 'lucide-react';
+import { formatRupiah } from '../utils/qrisGenerator';
 import { QRIS_MERCHANT_NAME, QRIS_NMID, WHATSAPP_NUMBER } from '../data/menuData';
+import qrisGopayImg from '../assets/qris_gopay.jpg';
 
 interface QrisModalProps {
   isOpen: boolean;
@@ -19,14 +20,14 @@ export const QrisModal: React.FC<QrisModalProps> = ({
   onConfirmQrisPaid,
 }) => {
   const [copiedAmount, setCopiedAmount] = useState<boolean>(false);
+  const [copiedNmid, setCopiedNmid] = useState<boolean>(false);
   const [secondsLeft, setSecondsLeft] = useState<number>(900); // 15 mins
-  const [matrix, setMatrix] = useState<boolean[][]>([]);
+  const [isZoomed, setIsZoomed] = useState<boolean>(false);
 
   useEffect(() => {
     if (isOpen) {
       setSecondsLeft(900);
-      const generated = generateQRMatrix(`QRIS.${QRIS_NMID}.${orderId}.${totalAmount}`, 29);
-      setMatrix(generated);
+      setIsZoomed(false);
     }
   }, [isOpen, orderId, totalAmount]);
 
@@ -50,99 +51,118 @@ export const QrisModal: React.FC<QrisModalProps> = ({
     setTimeout(() => setCopiedAmount(false), 2000);
   };
 
+  const handleCopyNmid = () => {
+    navigator.clipboard.writeText(QRIS_NMID);
+    setCopiedNmid(true);
+    setTimeout(() => setCopiedNmid(false), 2000);
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/70 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-stone-200 overflow-hidden flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-950/80 backdrop-blur-xs animate-in fade-in duration-200">
+      <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-stone-200 overflow-hidden flex flex-col max-h-[94vh]">
         
-        {/* Official-Style QRIS Header Banner */}
-        <div className="bg-[#DF192A] text-white px-6 py-4 flex items-center justify-between">
+        {/* GoPay Merchant & QRIS Top Header Banner */}
+        <div className="bg-gradient-to-r from-[#00A5CF] via-[#008BB9] to-[#006E96] text-white px-5 sm:px-6 py-3.5 flex items-center justify-between shadow-xs">
           <div className="flex items-center gap-3">
-            <div className="bg-white text-[#DF192A] px-2.5 py-1 rounded-md font-extrabold tracking-wider text-sm shadow-xs">
-              QRIS
+            <div className="bg-white text-[#008BB9] px-2.5 py-1 rounded-lg font-black tracking-wider text-xs shadow-xs flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>gopay merchant</span>
             </div>
             <div>
-              <div className="text-[11px] font-medium tracking-wide text-white/90 uppercase">
-                Standar Pembayaran Nasional
+              <div className="text-[10px] sm:text-[11px] font-semibold tracking-wide text-cyan-100 uppercase">
+                QRIS Standar Nasional · GPN
               </div>
-              <div className="text-xs font-bold text-white tracking-wide">
-                GPN · ASPI · Bank Indonesia
+              <div className="text-xs sm:text-sm font-black text-white tracking-tight">
+                Dapur Le'Paroan
               </div>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+            className="p-1.5 text-white/80 hover:text-white hover:bg-white/20 rounded-xl transition-colors cursor-pointer"
+            aria-label="Tutup modal"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Modal Scrollable Body */}
-        <div className="p-6 overflow-y-auto space-y-6">
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-5">
           
-          {/* Merchant Card */}
+          {/* Merchant Verified Badge & Name */}
           <div className="text-center space-y-1">
-            <span className="text-xs uppercase tracking-wider text-stone-400 font-semibold">
-              Merchant Resmi
-            </span>
-            <h3 className="text-xl font-bold text-stone-900 tracking-tight">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-50 text-cyan-900 text-[10px] font-extrabold uppercase tracking-wider border border-cyan-200 shadow-2xs">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#00A5CF]" />
+              <span>GOPAY MERCHANT RESMI</span>
+              <span>·</span>
+              <span>IKET IJO BINTARO</span>
+            </div>
+            <h3 className="text-lg sm:text-xl font-black text-stone-900 tracking-tight mt-1">
               {QRIS_MERCHANT_NAME}
             </h3>
-            <div className="flex items-center justify-center gap-2 text-xs text-stone-500 font-mono">
-              <span>NMID: {QRIS_NMID}</span>
+            <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-stone-500 font-mono">
+              <button
+                onClick={handleCopyNmid}
+                className="inline-flex items-center gap-1 hover:text-stone-900 cursor-pointer"
+                title="Klik untuk salin NMID"
+              >
+                <span>NMID: {QRIS_NMID}</span>
+                {copiedNmid ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3 text-stone-400" />}
+              </button>
               <span>·</span>
-              <span>ID: #{orderId}</span>
+              <span className="text-[#E86014] font-bold">Pesanan #{orderId}</span>
             </div>
           </div>
 
-          {/* QR Code Container */}
+          {/* Official GoPay Merchant QRIS Card Image */}
           <div className="flex flex-col items-center justify-center">
-            <div className="relative p-4 bg-white rounded-2xl border-2 border-stone-200 shadow-sm max-w-[280px]">
-              {/* QR Matrix */}
-              <svg
-                viewBox="0 0 29 29"
-                className="w-56 h-56 sm:w-60 sm:h-60"
-                shapeRendering="crispEdges"
-              >
-                {matrix.map((row, r) =>
-                  row.map((cell, c) =>
-                    cell ? (
-                      <rect
-                        key={`${r}-${c}`}
-                        x={c}
-                        y={r}
-                        width={1}
-                        height={1}
-                        fill="#1C1917"
-                      />
-                    ) : null
-                  )
-                )}
-              </svg>
+            <div className="relative group p-2.5 bg-linear-to-b from-stone-50 to-white rounded-2xl border-2 border-stone-200 shadow-md max-w-[290px] sm:max-w-[320px]">
+              
+              <img
+                src={qrisGopayImg}
+                alt={`QRIS GoPay ${QRIS_MERCHANT_NAME}`}
+                className="w-full h-auto rounded-xl object-contain border border-stone-100 cursor-pointer transition-transform duration-200 hover:scale-[1.01]"
+                onClick={() => setIsZoomed(true)}
+              />
 
-              {/* QRIS Center Emblem */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="bg-white p-1 rounded-md shadow-xs border border-stone-200">
-                  <div className="bg-[#DF192A] text-white text-[9px] font-extrabold px-1.5 py-0.5 rounded leading-none">
-                    QRIS
-                  </div>
-                </div>
+              {/* Hover overlay hint */}
+              <button
+                onClick={() => setIsZoomed(true)}
+                className="absolute bottom-4 right-4 bg-stone-900/80 hover:bg-stone-900 text-white text-[10px] font-semibold px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 backdrop-blur-xs shadow-md cursor-pointer transition-all"
+              >
+                <ZoomIn className="w-3.5 h-3.5" />
+                <span>Perbesar</span>
+              </button>
+            </div>
+
+            {/* Quick Actions for QR Image */}
+            <div className="mt-3 flex items-center gap-2">
+              <a
+                href={qrisGopayImg}
+                download="QRIS_Gopay_LeParoan.jpg"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold border border-stone-300 transition-colors shadow-2xs"
+              >
+                <Download className="w-3.5 h-3.5 text-stone-600" />
+                <span>Simpan Gambar QRIS</span>
+              </a>
+
+              <span className="text-stone-300">|</span>
+
+              <div className="flex items-center gap-1.5 text-xs text-stone-500">
+                <span>Batas Waktu:</span>
+                <span className="font-mono font-bold text-[#E86014] bg-orange-50 px-2 py-0.5 rounded border border-orange-200 tabular-nums">
+                  {timerStr}
+                </span>
               </div>
             </div>
-
-            {/* Countdown Timer */}
-            <div className="mt-3 flex items-center gap-2 text-xs text-stone-500">
-              <span>Batas Waktu Bayar:</span>
-              <span className="font-mono font-bold text-[#E86014] bg-orange-50 px-2 py-0.5 rounded border border-orange-200 tabular-nums">
-                {timerStr}
-              </span>
-            </div>
           </div>
 
-          {/* Nominal Box with Copy button */}
+          {/* Total Nominal Transfer Box with Copy */}
           <div className="bg-[#FAF7F2] border border-[#E8DFD3] rounded-2xl p-4 flex items-center justify-between">
             <div>
-              <div className="text-xs text-stone-500 font-medium">Total Nominal Transfer</div>
+              <div className="text-[11px] text-stone-500 font-semibold uppercase tracking-wider">
+                Total Nominal Pembayaran
+              </div>
               <div className="text-2xl font-black font-mono text-stone-900 mt-0.5 tabular-nums">
                 {formatRupiah(totalAmount)}
               </div>
@@ -150,7 +170,7 @@ export const QrisModal: React.FC<QrisModalProps> = ({
 
             <button
               onClick={handleCopyAmount}
-              className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold bg-white border border-stone-200 hover:border-stone-400 rounded-xl text-stone-700 transition-all cursor-pointer shadow-xs active:scale-95"
+              className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold bg-white border border-stone-200 hover:border-stone-400 rounded-xl text-stone-700 transition-all cursor-pointer shadow-xs active:scale-95"
             >
               {copiedAmount ? (
                 <>
@@ -160,32 +180,33 @@ export const QrisModal: React.FC<QrisModalProps> = ({
               ) : (
                 <>
                   <Copy className="w-4 h-4 text-stone-500" />
-                  <span>Salin Angka</span>
+                  <span>Salin Nominal</span>
                 </>
               )}
             </button>
           </div>
 
-          {/* Supported Apps */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-stone-700">
-              <Smartphone className="w-3.5 h-3.5 text-[#E86014]" />
-              <span>Dukungan Aplikasi Pembayaran:</span>
+          {/* Supported Apps List */}
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-stone-800">
+              <Smartphone className="w-3.5 h-3.5 text-[#00A5CF]" />
+              <span>Dapat Dibayar Menggunakan:</span>
             </div>
-            <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 text-xs text-stone-600 leading-relaxed">
-              BCA Mobile, Livin' by Mandiri, BRImo, BNI Mobile, GoPay, OVO, DANA, ShopeePay, LinkAja, AstraPay, dan seluruh m-Banking berlogo QRIS.
+            <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 text-[11px] sm:text-xs text-stone-600 leading-relaxed">
+              <strong>GoPay</strong>, BCA Mobile, Livin' by Mandiri, BNI Mobile, BRImo, OVO, DANA, ShopeePay, LinkAja, dan seluruh aplikasi m-Banking perbankan yang memiliki fitur scan QRIS.
             </div>
           </div>
 
-          {/* Steps */}
-          <div className="space-y-2 text-xs text-stone-600">
-            <div className="font-semibold text-stone-800">Petunjuk Pembayaran:</div>
-            <ol className="list-decimal pl-4 space-y-1">
-              <li>Buka aplikasi m-Banking atau E-Wallet pilihan Anda.</li>
-              <li>Pilih menu <strong>Scan / Bayar QRIS</strong>.</li>
-              <li>Arahkan kamera ke kode QR di layar ini.</li>
-              <li>Pastikan nama merchant tertera <strong>{QRIS_MERCHANT_NAME}</strong>.</li>
-              <li>Selesaikan pembayaran dan klik tombol konfirmasi di bawah.</li>
+          {/* Step-by-step instructions */}
+          <div className="space-y-2 text-xs text-stone-600 bg-stone-50/70 p-3.5 rounded-xl border border-stone-200">
+            <div className="font-bold text-stone-800">Petunjuk Pembayaran:</div>
+            <ol className="list-decimal pl-4 space-y-1 text-[11px] sm:text-xs text-stone-600">
+              <li>Buka aplikasi <strong>GoPay</strong>, m-Banking, atau E-Wallet Anda.</li>
+              <li>Pilih menu <strong>Bayar / Scan QRIS</strong>.</li>
+              <li>Scan kode QRIS di atas (atau unggah dari galeri jika disimpan).</li>
+              <li>Pastikan nama merchant tertera: <strong>{QRIS_MERCHANT_NAME}</strong>.</li>
+              <li>Masukkan nominal sesuai total yaitu <strong>{formatRupiah(totalAmount)}</strong> lalu selesaikan pembayaran.</li>
+              <li>Klik tombol konfirmasi hijau di bawah untuk kirim bukti ke WhatsApp admin.</li>
             </ol>
           </div>
 
@@ -202,15 +223,50 @@ export const QrisModal: React.FC<QrisModalProps> = ({
 
           <button
             onClick={onConfirmQrisPaid}
-            className="w-full sm:flex-1 py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer"
+            className="w-full sm:flex-1 py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-95 cursor-pointer"
           >
             <Check className="w-4 h-4" />
-            <span>Saya Sudah Bayar (Konfirmasi via WhatsApp)</span>
+            <span>Saya Sudah Bayar via QRIS (Kirim Bukti ke WA)</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
 
       </div>
+
+      {/* Lightbox Zoom Modal for QRIS */}
+      {isZoomed && (
+        <div
+          className="fixed inset-0 z-60 bg-black/90 flex flex-col items-center justify-center p-4 cursor-pointer"
+          onClick={() => setIsZoomed(false)}
+        >
+          <div className="relative max-w-sm w-full bg-white rounded-2xl overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="p-3 bg-stone-900 text-white flex items-center justify-between">
+              <span className="text-xs font-bold font-mono">QRIS GOPAY MERCHANT</span>
+              <button
+                onClick={() => setIsZoomed(false)}
+                className="p-1 text-stone-300 hover:text-white rounded-md"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <img
+              src={qrisGopayImg}
+              alt="QRIS Fullscreen"
+              className="w-full h-auto object-contain"
+            />
+            <div className="p-3 bg-stone-50 border-t border-stone-200 text-center">
+              <a
+                href={qrisGopayImg}
+                download="QRIS_Gopay_LeParoan.jpg"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-stone-900 text-white text-xs font-bold hover:bg-stone-800"
+              >
+                <Download className="w-4 h-4" />
+                <span>Download Gambar QRIS</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

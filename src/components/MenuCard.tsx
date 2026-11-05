@@ -1,63 +1,40 @@
 import React, { useState } from 'react';
 import { MenuItem } from '../data/menuData';
 import { formatRupiah } from '../utils/qrisGenerator';
-import { Plus, Check, Box, Sparkles, HeartHandshake, Info, Utensils } from 'lucide-react';
+import { Plus, Check, Star, Utensils, CheckCircle } from 'lucide-react';
 import { MENU_IMAGES } from '../data/menuImages';
 
 interface MenuCardProps {
   item: MenuItem;
-  onAddToCart: (
-    item: MenuItem,
-    quantity: number,
-    selectedVariant?: string,
-    selectedOption?: string,
-    customerNote?: string
-  ) => void;
-  onOpenNutritionDetail: () => void;
+  onAddToCart: (item: MenuItem, quantity: number) => void;
 }
 
-export const MenuCard: React.FC<MenuCardProps> = ({
-  item,
-  onAddToCart,
-  onOpenNutritionDetail,
-}) => {
-  const defaultVariant = item.variants ? item.variants[0].name : undefined;
-  const defaultOption = item.options ? item.options.choices[0] : undefined;
-
-  const [selectedVariant, setSelectedVariant] = useState<string | undefined>(defaultVariant);
-  const [selectedOption, setSelectedOption] = useState<string | undefined>(defaultOption);
-  const [customerNote, setCustomerNote] = useState<string>('');
+export const MenuCard: React.FC<MenuCardProps> = ({ item, onAddToCart }) => {
   const [quantity, setQuantity] = useState<number>(1);
   const [isAdded, setIsAdded] = useState<boolean>(false);
-  const [showNoteInput, setShowNoteInput] = useState<boolean>(false);
   const [imageError, setImageError] = useState<boolean>(false);
 
   const foodImage = MENU_IMAGES[item.id];
 
-  // Compute current unit price
-  let currentUnitPrice = item.price;
-  if (item.variants && selectedVariant) {
-    const matched = item.variants.find((v) => v.name === selectedVariant);
-    if (matched) {
-      currentUnitPrice = matched.price;
-    }
-  }
-
   const handleAdd = () => {
-    onAddToCart(item, quantity, selectedVariant, selectedOption, customerNote);
+    onAddToCart(item, quantity);
     setIsAdded(true);
     setTimeout(() => {
       setIsAdded(false);
-      setCustomerNote('');
-      setShowNoteInput(false);
       setQuantity(1);
     }, 1200);
   };
 
   return (
-    <div className="group relative flex flex-col justify-between bg-white border border-[#E8DFD3] rounded-2xl p-4 sm:p-5 transition-all duration-200 hover:shadow-md hover:border-[#D9CEBF]">
+    <div
+      className={`group relative flex flex-col justify-between bg-white border rounded-2xl p-4 sm:p-5 transition-all duration-200 hover:shadow-md ${
+        item.isPremiumHighlight
+          ? 'border-amber-300 shadow-amber-500/5 ring-1 ring-amber-300/60'
+          : 'border-[#E8DFD3] hover:border-[#D9CEBF]'
+      }`}
+    >
       <div>
-        {/* Leading Food Photography Slot (4:3 ratio) */}
+        {/* Leading Food Photography Slot */}
         <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-stone-100 mb-3.5 shadow-2xs">
           {!imageError && foodImage ? (
             <img
@@ -74,169 +51,66 @@ export const MenuCard: React.FC<MenuCardProps> = ({
             </div>
           )}
 
-          {/* Quiet Image Overlays */}
-          <div className="absolute top-2.5 left-2.5 px-2.5 py-1 bg-stone-900/85 backdrop-blur-xs text-white rounded-lg text-[11px] font-semibold tracking-wide">
-            {item.dayLabel} · {item.mealLabel}
+          {/* Code badge (e.g. NJ, SM, SB) on top left */}
+          <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+            <span className="w-7 h-7 bg-stone-950/90 text-white rounded-lg flex items-center justify-center font-mono font-black text-xs shadow-sm">
+              {item.code}
+            </span>
+            <span className="px-2 py-1 bg-stone-900/80 backdrop-blur-xs text-white rounded-lg text-[10px] font-semibold tracking-wide">
+              {item.mealLabel}
+            </span>
           </div>
 
-          <div className="absolute bottom-2.5 right-2.5 px-2 py-0.5 bg-white/95 backdrop-blur-xs text-stone-800 rounded-md text-[10px] font-medium flex items-center gap-1 shadow-2xs">
-            <Box className="w-3 h-3 text-[#E86014]" />
-            <span className="truncate max-w-[120px]">{item.packaging.split(' ')[0]} {item.packaging.split(' ')[1] || ''}</span>
-          </div>
-        </div>
-
-        {/* Dish Title */}
-        <h3 className="text-base sm:text-lg font-bold text-stone-900 group-hover:text-[#E86014] transition-colors leading-snug">
-          {item.name}
-        </h3>
-
-        {/* Description from PDF */}
-        <p className="text-xs sm:text-sm text-stone-600 mt-2 line-clamp-3 leading-relaxed">
-          {item.description}
-        </p>
-
-        {/* Highlights / Special Notes */}
-        {item.highlights && item.highlights.length > 0 && (
-          <ul className="mt-3 space-y-1">
-            {item.highlights.map((h, idx) => (
-              <li key={idx} className="flex items-start gap-1.5 text-xs text-stone-500">
-                <span className="text-[#E86014] text-xs font-bold leading-none mt-1">✓</span>
-                <span>{h}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {/* Friday Berkah notice */}
-        {item.cashbackNote && (
-          <div className="mt-3 p-2.5 bg-amber-50/80 border border-amber-200/80 rounded-xl flex items-start gap-2 text-xs text-amber-900">
-            <HeartHandshake className="w-4 h-4 text-[#E86014] shrink-0 mt-0.5" />
-            <div className="leading-tight">
-              <span className="font-semibold text-[#E86014]">Jumat Berkah: </span>
-              {item.cashbackNote}
-            </div>
-          </div>
-        )}
-
-        {/* Nutritional balance indicator bar */}
-        <div className="mt-4 pt-3 border-t border-stone-100">
-          <div className="flex items-center justify-between text-[11px] text-stone-500 mb-1.5">
-            <span className="font-medium">Komposisi Porsi Gizi:</span>
-            <button
-              onClick={onOpenNutritionDetail}
-              className="text-[#E86014] hover:underline flex items-center gap-1 cursor-pointer"
-            >
-              <span>{item.nutrition.karbo}% K · {item.nutrition.protein}% P · {item.nutrition.sayur}% S</span>
-              <Info className="w-3 h-3" />
-            </button>
-          </div>
-          <div className="h-1.5 w-full bg-stone-100 rounded-full overflow-hidden flex">
-            <div
-              style={{ width: `${item.nutrition.karbo}%` }}
-              className="bg-amber-400"
-              title={`Karbohidrat: ${item.nutrition.karbo}%`}
-            />
-            <div
-              style={{ width: `${item.nutrition.protein}%` }}
-              className="bg-red-400"
-              title={`Protein: ${item.nutrition.protein}%`}
-            />
-            <div
-              style={{ width: `${item.nutrition.sayur}%` }}
-              className="bg-emerald-500"
-              title={`Sayuran: ${item.nutrition.sayur}%`}
-            />
-          </div>
-        </div>
-
-        {/* Variant selector (e.g. Reguler / Premium) */}
-        {item.variants && (
-          <div className="mt-4 space-y-1.5">
-            <label className="text-xs font-semibold text-stone-700 block">
-              Pilihan Porsi:
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              {item.variants.map((v) => (
-                <button
-                  key={v.name}
-                  type="button"
-                  onClick={() => setSelectedVariant(v.name)}
-                  className={`px-2.5 py-1.5 text-xs rounded-lg border text-left transition-all cursor-pointer ${
-                    selectedVariant === v.name
-                      ? 'border-[#E86014] bg-[#E86014]/5 text-[#E86014] font-semibold'
-                      : 'border-stone-200 bg-stone-50 text-stone-700 hover:border-stone-300'
-                  }`}
-                >
-                  <div className="truncate">{v.name}</div>
-                  <div className="font-mono text-[11px] font-bold text-stone-900 mt-0.5">
-                    {formatRupiah(v.price)}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Options Selector (e.g. Nasi vs Bubur, Teh Serai vs Pokak, Ketupat vs Buras) */}
-        {item.options && (
-          <div className="mt-4 space-y-1.5">
-            <label className="text-xs font-semibold text-stone-700 block">
-              {item.options.title}:
-            </label>
-            <div className="flex flex-wrap gap-1.5">
-              {item.options.choices.map((choice) => (
-                <button
-                  key={choice}
-                  type="button"
-                  onClick={() => setSelectedOption(choice)}
-                  className={`px-3 py-1.5 text-xs rounded-lg border transition-all cursor-pointer ${
-                    selectedOption === choice
-                      ? 'border-[#E86014] bg-[#E86014]/10 text-[#E86014] font-semibold'
-                      : 'border-stone-200 bg-stone-50 text-stone-600 hover:border-stone-300'
-                  }`}
-                >
-                  {choice}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Customer Note Toggle & Input */}
-        <div className="mt-3">
-          {!showNoteInput ? (
-            <button
-              type="button"
-              onClick={() => setShowNoteInput(true)}
-              className="text-[11px] text-stone-500 hover:text-[#E86014] transition-colors cursor-pointer"
-            >
-              + Tambah catatan kustom (tanpa pedas, sambal pisah, dll)
-            </button>
-          ) : (
-            <div className="space-y-1">
-              <input
-                type="text"
-                placeholder="Contoh: Sambal dipisah, tanpa tauge..."
-                value={customerNote}
-                onChange={(e) => setCustomerNote(e.target.value)}
-                className="w-full px-2.5 py-1 text-xs bg-stone-50 border border-stone-200 rounded-lg text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-[#E86014]"
-              />
+          {/* Premium Badge if applicable */}
+          {item.isPremiumHighlight && (
+            <div className="absolute top-2.5 right-2.5 px-2.5 py-1 bg-amber-500 text-white font-bold text-[10px] rounded-lg shadow-sm flex items-center gap-1 uppercase tracking-wider">
+              <Star className="w-3 h-3 fill-white" />
+              <span>★ HARGA PREMIUM</span>
             </div>
           )}
+
+          {/* Availability Status bottom right */}
+          <div className="absolute bottom-2.5 right-2.5 px-2 py-0.5 bg-emerald-700/90 backdrop-blur-xs text-white rounded-md text-[10px] font-bold flex items-center gap-1 shadow-2xs font-mono">
+            <CheckCircle className="w-3 h-3 text-emerald-200" />
+            <span>{item.stockStatus}</span>
+          </div>
+        </div>
+
+        {/* Title & Price Header */}
+        <div className="space-y-0.5">
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="text-base sm:text-lg font-extrabold text-stone-900 group-hover:text-[#E86014] transition-colors leading-snug">
+              {item.name}
+            </h3>
+            <span className="text-base sm:text-lg font-black font-mono text-[#E86014] shrink-0">
+              {item.priceDisplay}
+            </span>
+          </div>
+          {item.subtitle && (
+            <p className="text-xs text-[#E86014] font-medium">
+              {item.subtitle}
+            </p>
+          )}
+        </div>
+
+        {/* Komposisi Saja */}
+        <div className="mt-3 p-2.5 bg-[#FAF7F2] border border-[#E8DFD3] rounded-xl text-xs text-stone-700 leading-relaxed">
+          <span className="font-semibold text-stone-900">Komposisi: </span>
+          {item.composition}
         </div>
       </div>
 
-      {/* Card Footer: Price & Add to Cart button */}
-      <div className="mt-5 pt-4 border-t border-stone-100 flex items-center justify-between gap-3">
+      {/* Card Footer: Subtotal, Stepper & Pesan Button */}
+      <div className="mt-4 pt-3.5 border-t border-stone-100 flex items-center justify-between gap-3">
         <div>
-          <div className="text-[11px] text-stone-400 font-medium">Harga</div>
-          <div className="text-base sm:text-lg font-bold font-mono text-stone-900 tabular-nums">
-            {formatRupiah(currentUnitPrice)}
+          <div className="text-[10px] text-stone-400 font-medium">Subtotal</div>
+          <div className="text-sm sm:text-base font-bold font-mono text-stone-900 tabular-nums">
+            {formatRupiah(item.price * quantity)}
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Quantity Stepper */}
+          {/* Stepper */}
           <div className="flex items-center border border-stone-200 rounded-lg bg-stone-50 p-0.5">
             <button
               type="button"
@@ -246,7 +120,7 @@ export const MenuCard: React.FC<MenuCardProps> = ({
             >
               -
             </button>
-            <span className="w-7 text-center text-xs font-bold font-mono text-stone-800 tabular-nums">
+            <span className="w-6 text-center text-xs font-bold font-mono text-stone-800 tabular-nums">
               {quantity}
             </span>
             <button

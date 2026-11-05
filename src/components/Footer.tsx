@@ -1,6 +1,6 @@
 import React from 'react';
-import { PhoneCall, QrCode, MapPin, Clock } from 'lucide-react';
-import { WHATSAPP_NUMBER } from '../data/menuData';
+import { PhoneCall, QrCode, MapPin, Clock, ShieldCheck } from 'lucide-react';
+import { WHATSAPP_NUMBER, BRAND_NAME, BRAND_LOCATION, BRAND_TAGLINE, QR_SUBDOMAIN } from '../data/menuData';
 import logoImg from '../assets/logo.png';
 
 export const Footer: React.FC = () => {
@@ -21,43 +21,47 @@ export const Footer: React.FC = () => {
               />
               <div>
                 <h3 className="text-xl font-extrabold text-white tracking-tight">
-                  Dapur Le'Paroan
+                  {BRAND_NAME}
                 </h3>
-                <p className="text-xs text-[#E86014] font-medium tracking-wide">
-                  Harga Kaki Lima, Penyajian Kaki Lima
+                <p className="text-xs text-[#E86014] font-bold tracking-wide">
+                  {BRAND_LOCATION} · {BRAND_TAGLINE}
                 </p>
               </div>
             </div>
 
             <p className="text-xs text-stone-400 leading-relaxed max-w-sm">
-              "Sekarang saatnya budaya tradisional Indonesia membuktikan pada dunia."
-              Rasa Nusantara, praktis setiap hari dalam kemasan paper bowl &amp; lunch box bergizi seimbang.
+              Menu Harian Nusantara 21 Pilihan: Sarapan (06-10), Makan Siang (11-14:30), dan Makan Malam (17-21). Porsi lengkap, hangat, siap antar Bintaro &amp; sekitarnya.
             </p>
+
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-stone-800 rounded-lg border border-stone-700 text-[11px] text-stone-300">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Pembayaran QRIS Resmi • Xendit Verified</span>
+            </div>
           </div>
 
           {/* Quick Links */}
           <div className="md:col-span-3 space-y-3">
             <h4 className="text-xs font-bold uppercase tracking-wider text-stone-400">
-              Menu &amp; Konsep
+              Sesi Gastronomi
             </h4>
             <ul className="space-y-2 text-xs">
               <li>
-                <a href="#menu-section" className="hover:text-[#E86014] transition-colors">
-                  Menu Harian (Senin - Minggu)
+                <a href="#sarapan" className="hover:text-[#E86014] transition-colors">
+                  01. Sarapan (06:00 - 10:00 WIB)
                 </a>
               </li>
               <li>
-                <a href="#jadwal-mingguan" className="hover:text-[#E86014] transition-colors">
-                  Rotasi 18 Menu Nusantara
+                <a href="#siang" className="hover:text-[#E86014] transition-colors">
+                  02. Makan Siang (11:00 - 14:30 WIB)
                 </a>
               </li>
               <li>
-                <a href="#cara-pesan" className="hover:text-[#E86014] transition-colors">
-                  Panduan Pesan &amp; Pembayaran QRIS
+                <a href="#malam" className="hover:text-[#E86014] transition-colors">
+                  03. Makan Malam (17:00 - 21:00 WIB)
                 </a>
               </li>
-              <li className="text-stone-500">
-                Paper Bowl &amp; Lunch Box Food-Grade
+              <li className="text-[#E86014] font-medium pt-1">
+                Komposisi Harga: 20K Base • 28K Premium
               </li>
             </ul>
           </div>
@@ -65,37 +69,50 @@ export const Footer: React.FC = () => {
           {/* Contact & Hours */}
           <div className="md:col-span-4 space-y-3">
             <h4 className="text-xs font-bold uppercase tracking-wider text-stone-400">
-              Layanan &amp; Pemesanan
+              Layanan &amp; Afiliator Bintaro
             </h4>
             <div className="space-y-2 text-xs text-stone-400">
               <div className="flex items-center gap-2">
                 <PhoneCall className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>WhatsApp: <strong className="text-white font-mono">{WHATSAPP_NUMBER}</strong></span>
+                <span>
+                  WhatsApp:{' '}
+                  <a
+                    href="https://wa.me/6285964245547"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white hover:text-emerald-400 font-mono font-bold transition-colors underline decoration-emerald-500/50 underline-offset-2"
+                  >
+                    {WHATSAPP_NUMBER}
+                  </a>
+                </span>
               </div>
               <div className="flex items-center gap-2">
-                <QrCode className="w-4 h-4 text-[#E86014] shrink-0" />
-                <span>Pembayaran: QRIS Semua Bank &amp; E-Wallet</span>
+                <QrCode className="w-4 h-4 text-[#DF192A] shrink-0" />
+                <span>QR Portal: <strong className="text-white font-mono">{QR_SUBDOMAIN}</strong></span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-stone-400 shrink-0" />
-                <span>Jam Layanan: Senin – Minggu, 06.00 – 21.00 WIB</span>
+                <span>Layanan: Setiap Hari, 06.00 – 21.00 WIB</span>
               </div>
+              <p className="text-[11px] text-stone-500 italic pt-1">
+                Format Chat: Nama Afiliator - Menu - Jam Antar - Alamat
+              </p>
             </div>
           </div>
 
         </div>
 
-        {/* Bottom Bar: Quiet Unboxed Copyright */}
+        {/* Bottom Bar */}
         <div className="pt-8 border-t border-stone-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-500">
           <div>
-            &copy; {new Date().getFullYear()} Dapur Le'Paroan. Cita Rasa Nusantara Setiap Hari.
+            &copy; {new Date().getFullYear()} Dapur Le'Paroan — Iket Ijo Bintaro • Masakan Nusantara Harian.
           </div>
-          <div className="flex items-center gap-4 text-stone-400">
-            <span>Kemasan Praktis</span>
+          <div className="flex items-center gap-3 text-stone-400 text-[11px]">
+            <span>20K Base</span>
             <span aria-hidden="true">·</span>
-            <span>Gizi Seimbang</span>
+            <span>28K Premium Highlight</span>
             <span aria-hidden="true">·</span>
-            <span>Halal &amp; Higienis</span>
+            <span>Fresh Cooked Daily</span>
           </div>
         </div>
 

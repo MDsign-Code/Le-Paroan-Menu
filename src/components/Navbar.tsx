@@ -1,21 +1,22 @@
 import React from 'react';
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingBag, MapPin } from 'lucide-react';
 import logoImg from '../assets/logo.png';
+import { BRAND_NAME, BRAND_LOCATION } from '../data/menuData';
 
 interface NavbarProps {
   cartCount: number;
   onOpenCart: () => void;
-  onOpenNutrition: () => void;
+  onOpenPriceTiers: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   cartCount,
   onOpenCart,
-  onOpenNutrition,
+  onOpenPriceTiers,
 }) => {
   return (
     <header className="sticky top-0 z-40 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#E6DFD5] transition-all">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between gap-6">
         {/* Zone 1: Brand Zone */}
         <a href="#top" className="flex items-center gap-3 whitespace-nowrap shrink-0 group">
           <img
@@ -23,51 +24,57 @@ export const Navbar: React.FC<NavbarProps> = ({
             alt="Dapur Le'Paroan Logo"
             className="h-10 w-auto object-contain transition-transform group-hover:scale-105"
           />
-          <span className="font-bold text-lg sm:text-xl tracking-tight text-stone-900 group-hover:text-[#E86014] transition-colors">
-            Dapur Le'Paroan
-          </span>
+          <div className="flex flex-col">
+            <span className="font-extrabold text-base sm:text-lg tracking-tight text-stone-900 group-hover:text-[#E86014] transition-colors leading-tight">
+              {BRAND_NAME}
+            </span>
+            <span className="text-[11px] font-semibold text-[#E86014] tracking-wide flex items-center gap-1">
+              <MapPin className="w-3 h-3" />
+              {BRAND_LOCATION}
+            </span>
+          </div>
         </a>
 
-        {/* Zone 2: 4-5 Navigation Links (Single-Line, Text with hover underlines) */}
-        <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-stone-600">
+        {/* Zone 2: Navigation Links */}
+        <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-stone-600">
           <a
-            href="#menu-section"
+            href="#sarapan"
             className="hover:text-[#E86014] transition-colors whitespace-nowrap shrink-0"
           >
-            Menu Harian
+            Sarapan (06-10)
           </a>
           <a
-            href="#jadwal-mingguan"
+            href="#siang"
             className="hover:text-[#E86014] transition-colors whitespace-nowrap shrink-0"
           >
-            Jadwal 7 Hari
+            Makan Siang
+          </a>
+          <a
+            href="#malam"
+            className="hover:text-[#E86014] transition-colors whitespace-nowrap shrink-0"
+          >
+            Makan Malam
           </a>
           <button
-            onClick={onOpenNutrition}
-            className="hover:text-[#E86014] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+            onClick={onOpenPriceTiers}
+            className="hover:text-[#E86014] transition-colors whitespace-nowrap shrink-0 cursor-pointer text-stone-600"
           >
-            Keseimbangan Gizi
+            Komposisi Harga (20K-28K)
           </button>
           <a
             href="#cara-pesan"
             className="hover:text-[#E86014] transition-colors whitespace-nowrap shrink-0"
           >
-            Cara Pemesanan
-          </a>
-          <a
-            href="#kontak-qris"
-            className="hover:text-[#E86014] transition-colors whitespace-nowrap shrink-0"
-          >
-            Pembayaran QRIS
+            Cara Pesan &amp; QRIS
           </a>
         </nav>
 
-        {/* Zone 3: 1 Primary Action (Keranjang Pesanan) */}
+        {/* Zone 3: Primary Action (Keranjang) */}
         <div className="flex items-center gap-3 shrink-0">
           <button
             onClick={onOpenCart}
             aria-label={`Keranjang pesanan ${cartCount} item`}
-            className="relative flex items-center gap-2.5 px-4 py-2.5 bg-[#E86014] hover:bg-[#D0520E] text-white rounded-xl font-semibold text-sm shadow-sm transition-all active:scale-95 cursor-pointer"
+            className="relative flex items-center gap-2 px-3.5 sm:px-4 py-2.5 bg-[#E86014] hover:bg-[#D0520E] text-white rounded-xl font-semibold text-xs sm:text-sm shadow-sm transition-all active:scale-95 cursor-pointer"
           >
             <ShoppingBag className="w-4 h-4" />
             <span className="whitespace-nowrap">Keranjang</span>

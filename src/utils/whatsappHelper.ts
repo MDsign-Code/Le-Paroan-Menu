@@ -1,5 +1,5 @@
 import { CartItem, OrderCustomerInfo } from '../types/order';
-import { WHATSAPP_INTL, QRIS_MERCHANT_NAME } from '../data/menuData';
+import { WHATSAPP_INTL, QRIS_MERCHANT_NAME, BRAND_NAME, BRAND_LOCATION } from '../data/menuData';
 import { formatRupiah } from './qrisGenerator';
 
 export function generateOrderId(): string {
@@ -15,45 +15,37 @@ export function buildWhatsAppMessage(
   totalAmount: number,
   isQrisPaid: boolean = false
 ): string {
-  const methodLabel = customer.method === 'delivery' ? 'Antar ke Alamat (Delivery)' : 'Ambil Sendiri (Takeaway / Pickup)';
-  const paymentLabel = customer.paymentMethod === 'qris' 
-    ? `QRIS (${QRIS_MERCHANT_NAME}) - ${isQrisPaid ? '✅ Sudah Scan & Bayar' : '⏳ Segera Konfirmasi QRIS'}` 
-    : 'Tunai / Bayar di Tempat (COD)';
+  const methodLabel = customer.method === 'delivery' 
+    ? 'Siap Antar Bintaro & Sekitarnya (Delivery)' 
+    : 'Ambil Sendiri di Dapur (Takeaway / Pickup)';
 
   const lines: string[] = [
-    `*PESANAN BARU - DAPUR LE\'PAROAN*`,
-    `ID Pesanan: *#${orderId}*`,
+    `*PESANAN MENU HARIAN - ${BRAND_NAME}*`,
+    `📍 *${BRAND_LOCATION}* (Harga Kaki 5 • Penyajian Bintang 5)`,
+    `No. Pesanan: *#${orderId}*`,
     `Waktu Pesan: ${new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })} WIB`,
     ``,
-    `*DATA PEMESAN:*`,
-    `• Nama: ${customer.name || '-'}`,
-    `• No. Telepon: ${customer.phone || '-'}`,
-    `• Metode: ${methodLabel}`,
+    `*FORMAT CHAT PEMESANAN:*`,
+    `• *Nama Pemesan*: ${customer.name || '-'}`,
+    `• *Agen / Afiliator*: ${customer.affiliatorName ? customer.affiliatorName : 'Langsung (Tanpa Afiliator)'}`,
+    `• *No. WhatsApp*: ${customer.phone || '-'}`,
+    `• *Jam Antar / Ambil*: ${customer.orderTime || 'Segera / Sesuai Jadwal'}`,
+    `• *Metode*: ${methodLabel}`,
   ];
 
   if (customer.method === 'delivery') {
-    lines.push(`• Alamat Pengiriman: ${customer.address || '-'}`);
-  }
-
-  if (customer.orderTime) {
-    lines.push(`• Rencana Jam Makan / Ambil: ${customer.orderTime}`);
+    lines.push(`• *Alamat Pengantaran*: ${customer.address || 'Area Bintaro'}`);
   }
 
   if (customer.additionalNotes) {
-    lines.push(`• Catatan Khusus: ${customer.additionalNotes}`);
+    lines.push(`• *Catatan Tambahan*: ${customer.additionalNotes}`);
   }
 
   lines.push(``);
-  lines.push(`*DAFTAR MENU PESANAN:*`);
+  lines.push(`*DAFTAR MENU PESANAN (KOMPOSISI LENGKAP):*`);
 
   items.forEach((item, index) => {
-    let title = `${index + 1}. *${item.item.name}*`;
-    if (item.selectedVariant) {
-      title += ` (${item.selectedVariant})`;
-    }
-    if (item.selectedOption) {
-      title += ` [${item.selectedOption}]`;
-    }
+    let title = `${index + 1}. [${item.item.code}] *${item.item.name}* (${item.item.priceDisplay})`;
     lines.push(title);
     lines.push(`   ${item.quantity}x @ ${formatRupiah(item.unitPrice)} = *${formatRupiah(item.unitPrice * item.quantity)}*`);
     if (item.customerNote) {
@@ -61,18 +53,12 @@ export function buildWhatsAppMessage(
     }
   });
 
-  // Calculate cashback if Friday items exist
-  const fridayItemCount = items.filter(i => i.item.day === 'jumat').reduce((acc, i) => acc + i.quantity, 0);
-  if (fridayItemCount > 0) {
-    lines.push(``);
-    lines.push(`✨ *Jumat Berkah:* Alokasi infak berbagi Rp${(fridayItemCount * 500).toLocaleString('id-ID')} (${fridayItemCount} porsi x Rp500)`);
-  }
-
   lines.push(``);
   lines.push(`*TOTAL PEMBAYARAN:* *${formatRupiah(totalAmount)}*`);
-  lines.push(`Metode Bayar: ${paymentLabel}`);
+  lines.push(`Metode Pembayaran: *QRIS* (${isQrisPaid ? '✅ SUDAH SCAN & BAYAR QRIS' : '⏳ Menunggu Konfirmasi QRIS'})`);
+  lines.push(`_Pembayaran hanya melalui QRIS — Aman, tercatat otomatis & Xendit Verified._`);
   lines.push(``);
-  lines.push(`Halo Admin Dapur Le\'Paroan, saya ingin mengonfirmasi pesanan ini. Mohon diproses ya. Terima kasih! 🙏🍛`);
+  lines.push(`Halo Admin Dapur Le\'Paroan Iket Ijo Bintaro, mohon pesanan segera diproses. Terima kasih! 🙏🍛`);
 
   return lines.join('\n');
 }

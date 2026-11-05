@@ -1,4 +1,4 @@
-import { MenuItem, DayOfWeek, MealType } from '../data/menuData';
+import { MenuItem, MealTime } from '../data/menuData';
 
 export interface CartItem {
   cartItemId: string;
@@ -10,15 +10,16 @@ export interface CartItem {
   customerNote: string;
 }
 
-export type OrderMethod = 'pickup' | 'delivery';
+export type OrderMethod = 'delivery' | 'pickup';
 export type PaymentMethod = 'qris' | 'tunai';
 
 export interface OrderCustomerInfo {
   name: string;
+  affiliatorName: string;
   phone: string;
   method: OrderMethod;
   address: string;
-  orderDay: DayOfWeek | 'hari-ini';
+  orderMealTime: MealTime | 'semua';
   orderTime: string;
   paymentMethod: PaymentMethod;
   additionalNotes: string;
