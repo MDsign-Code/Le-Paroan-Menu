@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowDown, QrCode, PhoneCall, Sparkles, UtensilsCrossed, ShieldCheck } from 'lucide-react';
 import { DayOfWeek } from '../data/menuData';
+import logoImg from '../assets/logo.png';
 
 interface HeroProps {
   currentDay: DayOfWeek;
@@ -91,7 +92,7 @@ export const Hero: React.FC<HeroProps> = ({ currentDay, onSelectDay, onOpenNutri
               <div className="flex items-center justify-between pb-6 border-b border-stone-800">
                 <div className="flex items-center gap-3">
                   <img
-                    src="/assets/aistudio/Le_Paron_Retro_Orange_Logo_066b3e07.png"
+                    src={logoImg}
                     alt="Logo Dapur Le'Paroan"
                     className="h-12 w-auto object-contain"
                   />

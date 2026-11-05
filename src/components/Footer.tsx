@@ -1,6 +1,7 @@
 import React from 'react';
 import { PhoneCall, QrCode, MapPin, Clock } from 'lucide-react';
 import { WHATSAPP_NUMBER } from '../data/menuData';
+import logoImg from '../assets/logo.png';
 
 export const Footer: React.FC = () => {
   return (
@@ -14,7 +15,7 @@ export const Footer: React.FC = () => {
           <div className="md:col-span-5 space-y-4">
             <div className="flex items-center gap-3">
               <img
-                src="/assets/aistudio/Le_Paron_Retro_Orange_Logo_066b3e07.png"
+                src={logoImg}
                 alt="Logo Dapur Le'Paroan"
                 className="h-12 w-auto object-contain"
               />

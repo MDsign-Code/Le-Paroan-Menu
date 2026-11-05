@@ -1,5 +1,6 @@
 import React from 'react';
 import { ShoppingBag } from 'lucide-react';
+import logoImg from '../assets/logo.png';
 
 interface NavbarProps {
   cartCount: number;
@@ -18,7 +19,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Zone 1: Brand Zone */}
         <a href="#top" className="flex items-center gap-3 whitespace-nowrap shrink-0 group">
           <img
-            src="/assets/aistudio/Le_Paron_Retro_Orange_Logo_066b3e07.png"
+            src={logoImg}
             alt="Dapur Le'Paroan Logo"
             className="h-10 w-auto object-contain transition-transform group-hover:scale-105"
           />
