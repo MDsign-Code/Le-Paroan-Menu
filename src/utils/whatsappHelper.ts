@@ -1,5 +1,6 @@
 import { CartItem, OrderCustomerInfo } from '../types/order';
-import { WHATSAPP_INTL, QRIS_MERCHANT_NAME, BRAND_NAME, BRAND_LOCATION } from '../data/menuData';
+import { QRIS_MERCHANT_NAME, BRAND_NAME, BRAND_LOCATION, WHATSAPP_INTL } from '../data/menuData';
+import { formatPhoneForWhatsApp } from '../data/affiliatorsData';
 import { formatRupiah } from './qrisGenerator';
 
 export function generateOrderId(): string {
@@ -19,17 +20,25 @@ export function buildWhatsAppMessage(
     ? 'Siap Antar Bintaro & Sekitarnya (Delivery)' 
     : 'Ambil Sendiri di Dapur (Takeaway / Pickup)';
 
+  // Build menu summary line for standard chat format: Nama Afiliator - Menu - Jam Antar
+  const menuSummary = items.map((i) => `${i.quantity}x ${i.item.name}`).join(', ');
+  const jamAntar = customer.orderTime || 'Segera';
+  const namaAfiliator = customer.affiliatorName || 'Dapur Pusat Bintaro';
+
   const lines: string[] = [
     `*PESANAN MENU HARIAN - ${BRAND_NAME}*`,
     `📍 *${BRAND_LOCATION}* (Harga Kaki 5 • Penyajian Bintang 5)`,
     `No. Pesanan: *#${orderId}*`,
     `Waktu Pesan: ${new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })} WIB`,
     ``,
-    `*FORMAT CHAT PEMESANAN:*`,
+    `*FORMAT CHAT AFILIATOR:*`,
+    `*${namaAfiliator} - ${menuSummary} - ${jamAntar}*`,
+    ``,
+    `*RINCIAN PEMESANAN:*`,
+    `• *Tujuan Agen / Afiliator*: *${namaAfiliator}* ${customer.affiliatorPhone ? `(${customer.affiliatorPhone})` : ''}`,
     `• *Nama Pemesan*: ${customer.name || '-'}`,
-    `• *Agen / Afiliator*: ${customer.affiliatorName ? customer.affiliatorName : 'Langsung (Tanpa Afiliator)'}`,
-    `• *No. WhatsApp*: ${customer.phone || '-'}`,
-    `• *Jam Antar / Ambil*: ${customer.orderTime || 'Segera / Sesuai Jadwal'}`,
+    `• *No. WhatsApp Pemesan*: ${customer.phone || '-'}`,
+    `• *Jam Antar / Ambil*: ${jamAntar}`,
     `• *Metode*: ${methodLabel}`,
   ];
 
@@ -55,15 +64,16 @@ export function buildWhatsAppMessage(
 
   lines.push(``);
   lines.push(`*TOTAL PEMBAYARAN:* *${formatRupiah(totalAmount)}*`);
-  lines.push(`Metode Pembayaran: *QRIS* (${isQrisPaid ? '✅ SUDAH SCAN & BAYAR QRIS' : '⏳ Menunggu Konfirmasi QRIS'})`);
-  lines.push(`_Pembayaran hanya melalui QRIS — Aman, tercatat otomatis & Xendit Verified._`);
+  lines.push(`Metode Pembayaran: *QRIS GoPay Merchant* (${isQrisPaid ? '✅ SUDAH SCAN & BAYAR QRIS' : '⏳ Menunggu Konfirmasi QRIS'})`);
+  lines.push(`_Pembayaran hanya melalui QRIS — Aman, tercatat otomatis (${QRIS_MERCHANT_NAME})._`);
   lines.push(``);
-  lines.push(`Halo Admin Dapur Le\'Paroan Iket Ijo Bintaro, mohon pesanan segera diproses. Terima kasih! 🙏🍛`);
+  lines.push(`Halo ${namaAfiliator}, mohon pesanan #${orderId} segera diproses. Terima kasih! 🙏🍛`);
 
   return lines.join('\n');
 }
 
-export function getWhatsAppUrl(message: string): string {
+export function getWhatsAppUrl(message: string, rawPhone?: string): string {
+  const targetPhone = rawPhone ? formatPhoneForWhatsApp(rawPhone) : WHATSAPP_INTL;
   const encoded = encodeURIComponent(message);
-  return `https://wa.me/${WHATSAPP_INTL}?text=${encoded}`;
+  return `https://wa.me/${targetPhone}?text=${encoded}`;
 }

@@ -1,9 +1,25 @@
 import React from 'react';
-import { MessageSquare, QrCode, PhoneCall, ShieldCheck, CheckCircle2, AlertTriangle, ExternalLink, Download } from 'lucide-react';
+import { MessageSquare, QrCode, PhoneCall, ShieldCheck, CheckCircle2, AlertTriangle, ExternalLink, Download, Users, Settings2 } from 'lucide-react';
 import { WHATSAPP_NUMBER, QRIS_MERCHANT_NAME, QRIS_NMID, QR_SUBDOMAIN, BRAND_LOCATION } from '../data/menuData';
+import { Affiliator, formatPhoneForWhatsApp } from '../data/affiliatorsData';
 import qrisGopayImg from '../assets/qris_gopay.jpg';
 
-export const OrderingGuideSection: React.FC = () => {
+interface OrderingGuideSectionProps {
+  affiliators?: Affiliator[];
+  selectedAffiliator?: Affiliator;
+  onSelectAffiliator?: (aff: Affiliator) => void;
+  onOpenManageAffiliators?: () => void;
+}
+
+export const OrderingGuideSection: React.FC<OrderingGuideSectionProps> = ({
+  affiliators = [],
+  selectedAffiliator,
+  onSelectAffiliator,
+  onOpenManageAffiliators,
+}) => {
+  const currentPhone = selectedAffiliator?.phone || WHATSAPP_NUMBER;
+  const currentName = selectedAffiliator?.name || "Admin Dapur Pusat";
+
   return (
     <section id="cara-pesan" className="py-14 bg-white border-t border-[#E8DFD3]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
@@ -25,34 +41,95 @@ export const OrderingGuideSection: React.FC = () => {
         {/* 2 Column Card: CARA MEMESAN & PEMBAYARAN QRIS */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
           
-          {/* Card 1: CARA MEMESAN (WhatsApp) */}
+          {/* Card 1: CARA MEMESAN (WhatsApp & Afiliator) */}
           <div className="bg-[#FAF7F2] border border-[#E8DFD3] rounded-3xl p-6 sm:p-8 flex flex-col justify-between space-y-6">
             <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-xs">
-                  <MessageSquare className="w-5 h-5 fill-white" />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-xs">
+                    <MessageSquare className="w-5 h-5 fill-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-extrabold text-lg text-stone-900">
+                      Cara Memesan via WhatsApp
+                    </h3>
+                    <p className="text-xs text-stone-500">
+                      Pilih Agen / Afiliator Terdekat
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-extrabold text-lg text-stone-900">
-                    Cara Memesan via WhatsApp
-                  </h3>
-                  <p className="text-xs text-stone-500">
-                    Agen / Afiliator &amp; Admin Dapur
-                  </p>
-                </div>
+
+                {onOpenManageAffiliators && (
+                  <button
+                    onClick={onOpenManageAffiliators}
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-100/70 hover:bg-emerald-100 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
+                  >
+                    <Settings2 className="w-3 h-3" />
+                    <span>Daftar WA Agen</span>
+                  </button>
+                )}
               </div>
 
               <div className="p-4 bg-white border border-[#E8DFD3] rounded-2xl space-y-2">
                 <div className="text-xs font-bold uppercase tracking-wider text-stone-400">
-                  Chat Format:
+                  Chat Format Standar:
                 </div>
                 <div className="font-mono text-xs font-semibold text-emerald-800 bg-emerald-50/70 p-3 rounded-xl border border-emerald-200">
                   Nama Afiliator - Menu - Jam Antar - Alamat Bintaro
                 </div>
                 <p className="text-[11px] text-stone-500 leading-relaxed pt-1">
-                  Pemesanan dapat langsung melalui web ini (klik tombol <strong>+ Tambah</strong> lalu <strong>Kirim Pesanan ke WhatsApp</strong>) atau hubungi nomor agen/afiliator Anda di <strong>{WHATSAPP_NUMBER}</strong>.
+                  Pemesanan dapat langsung melalui web ini (klik tombol <strong>Pesan</strong> lalu kirim ke WhatsApp) atau hubungi nomor agen/afiliator terdekat Anda.
                 </p>
               </div>
+
+              {/* Affiliator List Quick Picker */}
+              {affiliators.length > 0 && (
+                <div className="space-y-2 pt-1">
+                  <div className="text-xs font-bold text-stone-700 flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Pilihan Nomor WhatsApp Afiliator:</span>
+                  </div>
+
+                  <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                    {affiliators.map((aff) => {
+                      const isSel = selectedAffiliator?.id === aff.id;
+                      return (
+                        <div
+                          key={aff.id}
+                          className={`p-2.5 rounded-xl border flex items-center justify-between text-xs transition-colors ${
+                            isSel
+                              ? 'bg-emerald-50 border-emerald-300'
+                              : 'bg-white border-stone-200 hover:border-stone-300'
+                          }`}
+                        >
+                          <div className="min-w-0 pr-2">
+                            <div className="font-bold text-stone-900 truncate">
+                              [{aff.code}] {aff.name}
+                            </div>
+                            <div className="text-[11px] text-stone-500 font-mono">
+                              WA: {aff.phone} · {aff.area}
+                            </div>
+                          </div>
+
+                          {onSelectAffiliator && (
+                            <button
+                              type="button"
+                              onClick={() => onSelectAffiliator(aff)}
+                              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold shrink-0 cursor-pointer ${
+                                isSel
+                                  ? 'bg-emerald-600 text-white'
+                                  : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
+                              }`}
+                            >
+                              {isSel ? '✓ Aktif' : 'Pilih'}
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-2 text-xs text-stone-700">
                 <div className="flex items-center gap-2 font-medium">
@@ -68,13 +145,13 @@ export const OrderingGuideSection: React.FC = () => {
 
             <div className="pt-2">
               <a
-                href={`https://wa.me/6285964245547?text=${encodeURIComponent("Halo Admin Dapur Le'Paroan Iket Ijo Bintaro, saya ingin memesan menu harian.")}`}
+                href={`https://wa.me/${formatPhoneForWhatsApp(currentPhone)}?text=${encodeURIComponent(`Halo ${currentName}, saya ingin memesan menu harian Dapur Le'Paroan Iket Ijo Bintaro.`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-all"
               >
                 <PhoneCall className="w-4 h-4" />
-                <span>Hubungi WA Admin ({WHATSAPP_NUMBER})</span>
+                <span>Hubungi WA ({currentPhone})</span>
               </a>
             </div>
           </div>

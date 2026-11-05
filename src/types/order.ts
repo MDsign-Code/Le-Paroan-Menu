@@ -15,7 +15,9 @@ export type PaymentMethod = 'qris' | 'tunai';
 
 export interface OrderCustomerInfo {
   name: string;
+  affiliatorId?: string;
   affiliatorName: string;
+  affiliatorPhone?: string;
   phone: string;
   method: OrderMethod;
   address: string;

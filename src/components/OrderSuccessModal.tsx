@@ -11,6 +11,8 @@ interface OrderSuccessModalProps {
   waUrl: string;
   isQrisPaid: boolean;
   totalAmount: number;
+  affiliatorName?: string;
+  affiliatorPhone?: string;
 }
 
 export const OrderSuccessModal: React.FC<OrderSuccessModalProps> = ({
@@ -21,6 +23,8 @@ export const OrderSuccessModal: React.FC<OrderSuccessModalProps> = ({
   waUrl,
   isQrisPaid,
   totalAmount,
+  affiliatorName,
+  affiliatorPhone,
 }) => {
   const [copied, setCopied] = useState<boolean>(false);
 
@@ -77,7 +81,7 @@ export const OrderSuccessModal: React.FC<OrderSuccessModalProps> = ({
                 {isQrisPaid ? 'Pembayaran QRIS Siap Dikirim' : 'Pesanan Siap Diteruskan'}
               </div>
               <div className="text-emerald-700 mt-0.5">
-                Kirim detail pesanan Anda ke WhatsApp Dapur Le'Paroan (<strong>{WHATSAPP_NUMBER}</strong>) agar dapur langsung memproses.
+                Kirim detail pesanan Anda ke WhatsApp {affiliatorName ? <strong className="text-stone-900">{affiliatorName}</strong> : "Dapur Le'Paroan"} (<strong>{affiliatorPhone || WHATSAPP_NUMBER}</strong>) agar pesanan langsung diproses.
               </div>
             </div>
           </div>

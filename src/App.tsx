@@ -8,18 +8,32 @@ import { QrisModal } from './components/QrisModal';
 import { OrderSuccessModal } from './components/OrderSuccessModal';
 import { PriceTiersModal } from './components/PriceTiersModal';
 import { OrderingGuideSection } from './components/OrderingGuideSection';
+import { AffiliatorModal } from './components/AffiliatorModal';
 import { Footer } from './components/Footer';
 import { MENU_ITEMS, MenuItem, MealTime, PriceTier, BRAND_NAME, BRAND_LOCATION, WHATSAPP_NUMBER } from './data/menuData';
+import {
+  Affiliator,
+  getStoredAffiliators,
+  saveStoredAffiliators,
+  getInitialSelectedAffiliator,
+  STORAGE_KEY_SELECTED_AFF,
+} from './data/affiliatorsData';
 import { CartItem, OrderCustomerInfo } from './types/order';
 import { generateOrderId, buildWhatsAppMessage, getWhatsAppUrl } from './utils/whatsappHelper';
 import { formatRupiah } from './utils/qrisGenerator';
-import { ShoppingBag, ArrowRight, FilterX, Clock, Star } from 'lucide-react';
+import { ShoppingBag, ArrowRight, FilterX, Clock, Star, Phone, UserCheck, CheckCircle2 } from 'lucide-react';
 
 export default function App() {
   // Filter states
   const [selectedMeal, setSelectedMeal] = useState<MealTime | 'all'>('all');
   const [selectedTier, setSelectedTier] = useState<PriceTier | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // Multi-Affiliator State
+  const [affiliators, setAffiliators] = useState<Affiliator[]>(() => getStoredAffiliators());
+  const [selectedAffiliator, setSelectedAffiliator] = useState<Affiliator>(() => getInitialSelectedAffiliator());
+  const [isAffiliatorModalOpen, setIsAffiliatorModalOpen] = useState<boolean>(false);
+  const [affiliatorToast, setAffiliatorToast] = useState<string | null>(null);
 
   // Cart & Order State
   const [cartItems, setCartItems] = useState<CartItem[]>(() => {
@@ -32,33 +46,60 @@ export default function App() {
   });
 
   const [customerInfo, setCustomerInfo] = useState<OrderCustomerInfo>(() => {
+    const initAff = getInitialSelectedAffiliator();
     try {
       const saved = localStorage.getItem('dlp_bintaro_customer');
-      return saved ? JSON.parse(saved) : {
-        name: '',
-        affiliatorName: '',
-        phone: '',
-        method: 'delivery',
-        address: '',
-        orderMealTime: 'semua',
-        orderTime: '',
-        paymentMethod: 'qris',
-        additionalNotes: '',
-      };
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return {
+          ...parsed,
+          affiliatorId: initAff.id,
+          affiliatorName: initAff.name,
+          affiliatorPhone: initAff.phone,
+        };
+      }
     } catch {
-      return {
-        name: '',
-        affiliatorName: '',
-        phone: '',
-        method: 'delivery',
-        address: '',
-        orderMealTime: 'semua',
-        orderTime: '',
-        paymentMethod: 'qris',
-        additionalNotes: '',
-      };
+      // ignore
     }
+    return {
+      name: '',
+      affiliatorId: initAff.id,
+      affiliatorName: initAff.name,
+      affiliatorPhone: initAff.phone,
+      phone: '',
+      method: 'delivery',
+      address: '',
+      orderMealTime: 'semua',
+      orderTime: '',
+      paymentMethod: 'qris',
+      additionalNotes: '',
+    };
   });
+
+  // Check URL referral on initial mount for toast
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const affParam = params.get('aff') || params.get('agen') || params.get('afiliator');
+      if (affParam) {
+        setAffiliatorToast(`Anda memesan melalui ${selectedAffiliator.name}`);
+        const timer = setTimeout(() => setAffiliatorToast(null), 5000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [selectedAffiliator]);
+
+  // Keep customerInfo in sync with selectedAffiliator
+  useEffect(() => {
+    if (selectedAffiliator) {
+      setCustomerInfo((prev) => ({
+        ...prev,
+        affiliatorId: selectedAffiliator.id,
+        affiliatorName: selectedAffiliator.name,
+        affiliatorPhone: selectedAffiliator.phone,
+      }));
+    }
+  }, [selectedAffiliator]);
 
   // Modals state
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
@@ -89,11 +130,29 @@ export default function App() {
     }
   }, [customerInfo]);
 
+  // Handle affiliator selection
+  const handleSelectAffiliator = (aff: Affiliator) => {
+    setSelectedAffiliator(aff);
+    try {
+      localStorage.setItem(STORAGE_KEY_SELECTED_AFF, aff.id);
+    } catch (e) {
+      // ignore
+    }
+    setCustomerInfo((prev) => ({
+      ...prev,
+      affiliatorId: aff.id,
+      affiliatorName: aff.name,
+      affiliatorPhone: aff.phone,
+    }));
+  };
+
+  const handleSaveAffiliators = (updatedList: Affiliator[]) => {
+    setAffiliators(updatedList);
+    saveStoredAffiliators(updatedList);
+  };
+
   // Add Item to Cart
-  const handleAddToCart = (
-    item: MenuItem,
-    quantity: number
-  ) => {
+  const handleAddToCart = (item: MenuItem, quantity: number) => {
     const cartItemId = item.id;
 
     setCartItems((prev) => {
@@ -194,7 +253,7 @@ export default function App() {
     setIsQrisOpen(true);
   };
 
-  // Confirm QRIS Payment & Ready to WhatsApp
+  // Confirm QRIS Payment & Ready to WhatsApp (targeted to selected affiliator's phone)
   const handleConfirmQrisPaid = () => {
     setIsQrisPaid(true);
     setIsQrisOpen(false);
@@ -207,11 +266,11 @@ export default function App() {
       true
     );
     setActiveWaMessage(msg);
-    setActiveWaUrl(getWhatsAppUrl(msg));
+    setActiveWaUrl(getWhatsAppUrl(msg, selectedAffiliator.phone));
     setIsOrderSuccessOpen(true);
   };
 
-  // Proceed Direct to WhatsApp
+  // Proceed Direct to WhatsApp (targeted to selected affiliator's phone)
   const handleProceedDirectWhatsApp = () => {
     const orderId = generateOrderId();
     setActiveOrderId(orderId);
@@ -226,17 +285,33 @@ export default function App() {
       false
     );
     setActiveWaMessage(msg);
-    setActiveWaUrl(getWhatsAppUrl(msg));
+    setActiveWaUrl(getWhatsAppUrl(msg, selectedAffiliator.phone));
     setIsOrderSuccessOpen(true);
   };
 
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-stone-900 flex flex-col font-['Plus_Jakarta_Sans',sans-serif]">
+      {/* Referral Toast if active */}
+      {affiliatorToast && (
+        <div className="bg-emerald-600 text-white text-xs font-semibold px-4 py-2 text-center flex items-center justify-center gap-2 animate-in slide-in-from-top-2 duration-300">
+          <CheckCircle2 className="w-4 h-4 shrink-0" />
+          <span>{affiliatorToast} ({selectedAffiliator.phone})</span>
+          <button
+            onClick={() => setAffiliatorToast(null)}
+            className="ml-2 text-white/80 hover:text-white underline cursor-pointer"
+          >
+            Tutup
+          </button>
+        </div>
+      )}
+
       {/* Top Bar Navigation */}
       <Navbar
         cartCount={cartTotalItems}
         onOpenCart={() => setIsCartOpen(true)}
         onOpenPriceTiers={() => setIsPriceTiersOpen(true)}
+        selectedAffiliator={selectedAffiliator}
+        onOpenAffiliators={() => setIsAffiliatorModalOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -283,8 +358,18 @@ export default function App() {
               </p>
             </div>
 
-            <div className="text-xs text-stone-600 font-semibold bg-white px-3.5 py-2 rounded-xl border border-[#E8DFD3] shadow-2xs self-start sm:self-auto">
-              Menampilkan <span className="font-bold text-[#E86014] font-mono">{filteredMenuItems.length}</span> Menu Tersedia
+            <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+              <button
+                onClick={() => setIsAffiliatorModalOpen(true)}
+                className="text-xs text-emerald-800 font-semibold bg-emerald-50 hover:bg-emerald-100 px-3 py-2 rounded-xl border border-emerald-200 transition-colors flex items-center gap-1.5 cursor-pointer"
+              >
+                <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                <span>WA Tujuan: <strong>{selectedAffiliator.name}</strong></span>
+              </button>
+
+              <div className="text-xs text-stone-600 font-semibold bg-white px-3 py-2 rounded-xl border border-[#E8DFD3] shadow-2xs">
+                <span className="font-bold text-[#E86014] font-mono">{filteredMenuItems.length}</span> Menu
+              </div>
             </div>
           </div>
 
@@ -326,9 +411,13 @@ export default function App() {
           )}
         </section>
 
-
-        {/* WhatsApp & QRIS Ordering Guide */}
-        <OrderingGuideSection />
+        {/* WhatsApp & QRIS Ordering Guide with Affiliator contacts */}
+        <OrderingGuideSection
+          affiliators={affiliators}
+          selectedAffiliator={selectedAffiliator}
+          onSelectAffiliator={handleSelectAffiliator}
+          onOpenManageAffiliators={() => setIsAffiliatorModalOpen(true)}
+        />
       </main>
 
       {/* Footer */}
@@ -368,6 +457,10 @@ export default function App() {
         onUpdateCustomerInfo={handleUpdateCustomerInfo}
         onProceedToQris={handleProceedToQris}
         onProceedDirectWhatsApp={handleProceedDirectWhatsApp}
+        affiliators={affiliators}
+        selectedAffiliator={selectedAffiliator}
+        onSelectAffiliator={handleSelectAffiliator}
+        onOpenManageAffiliators={() => setIsAffiliatorModalOpen(true)}
       />
 
       {/* QRIS Payment Modal */}
@@ -377,6 +470,8 @@ export default function App() {
         orderId={activeOrderId}
         totalAmount={totalAmount}
         onConfirmQrisPaid={handleConfirmQrisPaid}
+        affiliatorName={selectedAffiliator.name}
+        affiliatorPhone={selectedAffiliator.phone}
       />
 
       {/* Order Success & WhatsApp Forward Modal */}
@@ -388,12 +483,24 @@ export default function App() {
         waUrl={activeWaUrl}
         isQrisPaid={isQrisPaid}
         totalAmount={totalAmount}
+        affiliatorName={selectedAffiliator.name}
+        affiliatorPhone={selectedAffiliator.phone}
       />
 
       {/* Price Tiers Modal */}
       <PriceTiersModal
         isOpen={isPriceTiersOpen}
         onClose={() => setIsPriceTiersOpen(false)}
+      />
+
+      {/* Affiliators Manager Modal */}
+      <AffiliatorModal
+        isOpen={isAffiliatorModalOpen}
+        onClose={() => setIsAffiliatorModalOpen(false)}
+        affiliators={affiliators}
+        selectedAffiliator={selectedAffiliator}
+        onSelectAffiliator={handleSelectAffiliator}
+        onSaveAffiliators={handleSaveAffiliators}
       />
     </div>
   );

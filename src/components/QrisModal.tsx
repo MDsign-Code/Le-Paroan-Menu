@@ -10,6 +10,8 @@ interface QrisModalProps {
   orderId: string;
   totalAmount: number;
   onConfirmQrisPaid: () => void;
+  affiliatorName?: string;
+  affiliatorPhone?: string;
 }
 
 export const QrisModal: React.FC<QrisModalProps> = ({
@@ -18,6 +20,8 @@ export const QrisModal: React.FC<QrisModalProps> = ({
   orderId,
   totalAmount,
   onConfirmQrisPaid,
+  affiliatorName,
+  affiliatorPhone,
 }) => {
   const [copiedAmount, setCopiedAmount] = useState<boolean>(false);
   const [copiedNmid, setCopiedNmid] = useState<boolean>(false);
@@ -226,7 +230,7 @@ export const QrisModal: React.FC<QrisModalProps> = ({
             className="w-full sm:flex-1 py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-95 cursor-pointer"
           >
             <Check className="w-4 h-4" />
-            <span>Saya Sudah Bayar via QRIS (Kirim Bukti ke WA)</span>
+            <span>Saya Sudah Bayar via QRIS (Kirim ke WA {affiliatorName ? affiliatorName : 'Admin'})</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>

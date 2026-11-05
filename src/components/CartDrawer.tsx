@@ -4,6 +4,8 @@ import { formatRupiah } from '../utils/qrisGenerator';
 import { X, Trash2, ShoppingBag, ArrowRight, QrCode, Banknote, Sparkles, AlertCircle } from 'lucide-react';
 import { WHATSAPP_NUMBER } from '../data/menuData';
 import { MENU_IMAGES } from '../data/menuImages';
+import { Affiliator } from '../data/affiliatorsData';
+import { AffiliatorSelector } from './AffiliatorSelector';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -16,6 +18,10 @@ interface CartDrawerProps {
   onUpdateCustomerInfo: (info: Partial<OrderCustomerInfo>) => void;
   onProceedToQris: () => void;
   onProceedDirectWhatsApp: () => void;
+  affiliators: Affiliator[];
+  selectedAffiliator: Affiliator;
+  onSelectAffiliator: (aff: Affiliator) => void;
+  onOpenManageAffiliators: () => void;
 }
 
 export const CartDrawer: React.FC<CartDrawerProps> = ({
@@ -29,6 +35,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   onUpdateCustomerInfo,
   onProceedToQris,
   onProceedDirectWhatsApp,
+  affiliators,
+  selectedAffiliator,
+  onSelectAffiliator,
+  onOpenManageAffiliators,
 }) => {
   const [errorMsg, setErrorMsg] = useState<string>('');
 
@@ -240,19 +250,13 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                       />
                     </div>
 
-                    {/* Affiliator / Agent Name */}
+                    {/* Affiliator & WhatsApp Selector */}
                     <div>
-                      <label className="text-xs font-semibold text-stone-700 block mb-1">
-                        Nama Agen / Afiliator <span className="text-stone-400 font-normal">(Jika ada referensi)</span>
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Contoh: Afiliator Bintaro Jaya / kosongkan jika langsung"
-                        value={customerInfo.affiliatorName}
-                        onChange={(e) =>
-                          onUpdateCustomerInfo({ affiliatorName: e.target.value })
-                        }
-                        className="w-full px-3 py-2 text-xs bg-stone-50 border border-stone-200 rounded-lg text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-[#E86014]"
+                      <AffiliatorSelector
+                        affiliators={affiliators}
+                        selectedAffiliator={selectedAffiliator}
+                        onSelectAffiliator={onSelectAffiliator}
+                        onOpenManageModal={onOpenManageAffiliators}
                       />
                     </div>
 
