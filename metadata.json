@@ -1,0 +1,6 @@
+{
+  "name": "Dapur Le'Paroan - Menu Digital & Order WhatsApp",
+  "description": "Menu digital mingguan Dapur Le'Paroan. Cita rasa Nusantara praktis setiap hari dengan pemesanan via WhatsApp dan pembayaran QRIS.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
