@@ -121,17 +121,18 @@ export const Hero: React.FC<HeroProps> = ({ onOpenPriceTiers }) => {
               
               {/* Retro Orange Logo badge */}
               <div className="flex items-center justify-between pb-5 border-b border-stone-800">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3.5">
                   <img
                     src={logoImg}
                     alt="Logo Dapur Le'Paroan"
-                    className="h-12 w-auto object-contain"
+                    className="h-14 w-14 sm:h-16 sm:w-16 rounded-2xl object-cover shadow-md border border-amber-300/40 shrink-0"
                   />
                   <div>
                     <span className="text-[10px] font-bold tracking-wider uppercase text-[#E86014] bg-[#E86014]/20 px-2 py-0.5 rounded">
                       IKET IJO BINTARO
                     </span>
-                    <h2 className="text-base font-bold text-white mt-1">Dapur Le'Paroan</h2>
+                    <h2 className="text-base sm:text-lg font-bold text-white mt-1">Dapur Le'Paroan</h2>
+                    <p className="text-[11px] text-stone-400">Harga Kaki 5 • Penyajian Bintang 5</p>
                   </div>
                 </div>
                 <div className="text-right">

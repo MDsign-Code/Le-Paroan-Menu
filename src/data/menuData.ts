@@ -87,7 +87,7 @@ export const MENU_ITEMS: MenuItem[] = [
   {
     id: 'sarapan-ba',
     code: 'BA',
-    name: "Bubur Ayam Le'Paroan",
+    name: "Bubur Ayam Le'Paron",
     mealTime: 'sarapan',
     mealLabel: 'Sarapan Pagi',
     price: 20000,

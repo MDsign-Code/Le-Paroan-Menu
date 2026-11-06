@@ -23,7 +23,7 @@ export function buildWhatsAppMessage(
   // Build menu summary line for standard chat format: Nama Afiliator - Menu - Jam Antar
   const menuSummary = items.map((i) => `${i.quantity}x ${i.item.name}`).join(', ');
   const jamAntar = customer.orderTime || 'Segera';
-  const namaAfiliator = customer.affiliatorName || 'Dapur Pusat Bintaro';
+  const namaAfiliator = customer.affiliatorName?.trim() || 'Iket Ijo Bintaro';
 
   const lines: string[] = [
     `*PESANAN MENU HARIAN - ${BRAND_NAME}*`,
@@ -35,7 +35,7 @@ export function buildWhatsAppMessage(
     `*${namaAfiliator} - ${menuSummary} - ${jamAntar}*`,
     ``,
     `*RINCIAN PEMESANAN:*`,
-    `• *Tujuan Agen / Afiliator*: *${namaAfiliator}* ${customer.affiliatorPhone ? `(${customer.affiliatorPhone})` : ''}`,
+    `• *Nama Afiliator*: *${namaAfiliator}*`,
     `• *Nama Pemesan*: ${customer.name || '-'}`,
     `• *No. WhatsApp Pemesan*: ${customer.phone || '-'}`,
     `• *Jam Antar / Ambil*: ${jamAntar}`,
@@ -65,9 +65,9 @@ export function buildWhatsAppMessage(
   lines.push(``);
   lines.push(`*TOTAL PEMBAYARAN:* *${formatRupiah(totalAmount)}*`);
   lines.push(`Metode Pembayaran: *QRIS GoPay Merchant* (${isQrisPaid ? '✅ SUDAH SCAN & BAYAR QRIS' : '⏳ Menunggu Konfirmasi QRIS'})`);
-  lines.push(`_Pembayaran hanya melalui QRIS — Aman, tercatat otomatis (${QRIS_MERCHANT_NAME})._`);
+  lines.push(`_Pembayaran hanya melalui QRIS — Aman & tercatat otomatis (${QRIS_MERCHANT_NAME})._`);
   lines.push(``);
-  lines.push(`Halo ${namaAfiliator}, mohon pesanan #${orderId} segera diproses. Terima kasih! 🙏🍛`);
+  lines.push(`Halo Admin Dapur Le'Paroan, saya telah menyelesaikan konfirmasi pembayaran QRIS untuk pesanan #${orderId}. Mohon segera diproses. Terima kasih! 🙏🍛`);
 
   return lines.join('\n');
 }

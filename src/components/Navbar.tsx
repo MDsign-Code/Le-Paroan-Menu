@@ -1,23 +1,18 @@
 import React from 'react';
-import { ShoppingBag, MapPin, Phone, ChevronDown } from 'lucide-react';
+import { ShoppingBag, MapPin } from 'lucide-react';
 import logoImg from '../assets/logo.png';
 import { BRAND_NAME, BRAND_LOCATION } from '../data/menuData';
-import { Affiliator } from '../data/affiliatorsData';
 
 interface NavbarProps {
   cartCount: number;
   onOpenCart: () => void;
   onOpenPriceTiers: () => void;
-  selectedAffiliator?: Affiliator;
-  onOpenAffiliators?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   cartCount,
   onOpenCart,
   onOpenPriceTiers,
-  selectedAffiliator,
-  onOpenAffiliators,
 }) => {
   return (
     <header className="sticky top-0 z-40 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#E6DFD5] transition-all">
@@ -27,7 +22,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <img
             src={logoImg}
             alt="Dapur Le'Paroan Logo"
-            className="h-9 sm:h-10 w-auto object-contain transition-transform group-hover:scale-105"
+            className="h-11 w-11 sm:h-12 sm:w-12 rounded-xl object-cover shadow-sm ring-1 ring-amber-300/50 border border-emerald-900/30 transition-transform group-hover:scale-105"
           />
           <div className="flex flex-col">
             <span className="font-extrabold text-sm sm:text-lg tracking-tight text-stone-900 group-hover:text-[#E86014] transition-colors leading-tight">
@@ -74,24 +69,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           </a>
         </nav>
 
-        {/* Zone 3: Affiliator Badge & Cart */}
+        {/* Zone 3: Direct Cart */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          {/* Active Affiliator Quick Badge */}
-          {selectedAffiliator && onOpenAffiliators && (
-            <button
-              onClick={onOpenAffiliators}
-              className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100/80 text-emerald-950 border border-emerald-200/90 rounded-xl text-xs font-semibold transition-colors cursor-pointer shadow-2xs"
-              title="Klik untuk memilih atau mengubah Afiliator WhatsApp"
-            >
-              <Phone className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-              <span className="hidden sm:inline text-stone-500 font-normal">WA:</span>
-              <span className="truncate max-w-[90px] sm:max-w-[140px] font-bold">
-                {selectedAffiliator.name}
-              </span>
-              <ChevronDown className="w-3 h-3 text-emerald-700 shrink-0 opacity-70" />
-            </button>
-          )}
-
           {/* Cart Button */}
           <button
             onClick={onOpenCart}

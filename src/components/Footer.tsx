@@ -17,7 +17,7 @@ export const Footer: React.FC = () => {
               <img
                 src={logoImg}
                 alt="Logo Dapur Le'Paroan"
-                className="h-12 w-auto object-contain"
+                className="h-14 w-14 rounded-2xl object-cover shadow-sm border border-amber-300/30 shrink-0"
               />
               <div>
                 <h3 className="text-xl font-extrabold text-white tracking-tight">

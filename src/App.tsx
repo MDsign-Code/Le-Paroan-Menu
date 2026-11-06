@@ -53,9 +53,8 @@ export default function App() {
         const parsed = JSON.parse(saved);
         return {
           ...parsed,
-          affiliatorId: initAff.id,
-          affiliatorName: initAff.name,
-          affiliatorPhone: initAff.phone,
+          affiliatorName: parsed.affiliatorName || 'Iket Ijo Bintaro',
+          affiliatorPhone: WHATSAPP_NUMBER,
         };
       }
     } catch {
@@ -63,9 +62,8 @@ export default function App() {
     }
     return {
       name: '',
-      affiliatorId: initAff.id,
-      affiliatorName: initAff.name,
-      affiliatorPhone: initAff.phone,
+      affiliatorName: 'Iket Ijo Bintaro',
+      affiliatorPhone: WHATSAPP_NUMBER,
       phone: '',
       method: 'delivery',
       address: '',
@@ -253,7 +251,7 @@ export default function App() {
     setIsQrisOpen(true);
   };
 
-  // Confirm QRIS Payment & Ready to WhatsApp (targeted to selected affiliator's phone)
+  // Confirm QRIS Payment & Directly Enter WhatsApp to official Dapur Le'Paroan (085964245547)
   const handleConfirmQrisPaid = () => {
     setIsQrisPaid(true);
     setIsQrisOpen(false);
@@ -266,11 +264,19 @@ export default function App() {
       true
     );
     setActiveWaMessage(msg);
-    setActiveWaUrl(getWhatsAppUrl(msg, selectedAffiliator.phone));
+    const targetUrl = getWhatsAppUrl(msg, WHATSAPP_NUMBER);
+    setActiveWaUrl(targetUrl);
     setIsOrderSuccessOpen(true);
+
+    // Langsung masuk ke WhatsApp setelah konfirmasi pembayaran sesuai instruksi user
+    try {
+      window.open(targetUrl, '_blank');
+    } catch {
+      // fallback
+    }
   };
 
-  // Proceed Direct to WhatsApp (targeted to selected affiliator's phone)
+  // Proceed Direct to WhatsApp
   const handleProceedDirectWhatsApp = () => {
     const orderId = generateOrderId();
     setActiveOrderId(orderId);
@@ -285,33 +291,24 @@ export default function App() {
       false
     );
     setActiveWaMessage(msg);
-    setActiveWaUrl(getWhatsAppUrl(msg, selectedAffiliator.phone));
+    const targetUrl = getWhatsAppUrl(msg, WHATSAPP_NUMBER);
+    setActiveWaUrl(targetUrl);
     setIsOrderSuccessOpen(true);
+
+    try {
+      window.open(targetUrl, '_blank');
+    } catch {
+      // fallback
+    }
   };
 
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-stone-900 flex flex-col font-['Plus_Jakarta_Sans',sans-serif]">
-      {/* Referral Toast if active */}
-      {affiliatorToast && (
-        <div className="bg-emerald-600 text-white text-xs font-semibold px-4 py-2 text-center flex items-center justify-center gap-2 animate-in slide-in-from-top-2 duration-300">
-          <CheckCircle2 className="w-4 h-4 shrink-0" />
-          <span>{affiliatorToast} ({selectedAffiliator.phone})</span>
-          <button
-            onClick={() => setAffiliatorToast(null)}
-            className="ml-2 text-white/80 hover:text-white underline cursor-pointer"
-          >
-            Tutup
-          </button>
-        </div>
-      )}
-
       {/* Top Bar Navigation */}
       <Navbar
         cartCount={cartTotalItems}
         onOpenCart={() => setIsCartOpen(true)}
         onOpenPriceTiers={() => setIsPriceTiersOpen(true)}
-        selectedAffiliator={selectedAffiliator}
-        onOpenAffiliators={() => setIsAffiliatorModalOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -358,17 +355,9 @@ export default function App() {
               </p>
             </div>
 
-            <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
-              <button
-                onClick={() => setIsAffiliatorModalOpen(true)}
-                className="text-xs text-emerald-800 font-semibold bg-emerald-50 hover:bg-emerald-100 px-3 py-2 rounded-xl border border-emerald-200 transition-colors flex items-center gap-1.5 cursor-pointer"
-              >
-                <Phone className="w-3.5 h-3.5 text-emerald-600" />
-                <span>WA Tujuan: <strong>{selectedAffiliator.name}</strong></span>
-              </button>
-
+            <div className="flex items-center gap-2 self-start sm:self-auto">
               <div className="text-xs text-stone-600 font-semibold bg-white px-3 py-2 rounded-xl border border-[#E8DFD3] shadow-2xs">
-                <span className="font-bold text-[#E86014] font-mono">{filteredMenuItems.length}</span> Menu
+                <span className="font-bold text-[#E86014] font-mono">{filteredMenuItems.length}</span> Menu Tersedia
               </div>
             </div>
           </div>
@@ -411,13 +400,8 @@ export default function App() {
           )}
         </section>
 
-        {/* WhatsApp & QRIS Ordering Guide with Affiliator contacts */}
-        <OrderingGuideSection
-          affiliators={affiliators}
-          selectedAffiliator={selectedAffiliator}
-          onSelectAffiliator={handleSelectAffiliator}
-          onOpenManageAffiliators={() => setIsAffiliatorModalOpen(true)}
-        />
+        {/* WhatsApp & QRIS Ordering Guide */}
+        <OrderingGuideSection />
       </main>
 
       {/* Footer */}
@@ -460,7 +444,7 @@ export default function App() {
         affiliators={affiliators}
         selectedAffiliator={selectedAffiliator}
         onSelectAffiliator={handleSelectAffiliator}
-        onOpenManageAffiliators={() => setIsAffiliatorModalOpen(true)}
+        onOpenManageAffiliators={() => {}}
       />
 
       {/* QRIS Payment Modal */}
@@ -470,8 +454,8 @@ export default function App() {
         orderId={activeOrderId}
         totalAmount={totalAmount}
         onConfirmQrisPaid={handleConfirmQrisPaid}
-        affiliatorName={selectedAffiliator.name}
-        affiliatorPhone={selectedAffiliator.phone}
+        affiliatorName="Dapur Le'Paroan Pusat"
+        affiliatorPhone={WHATSAPP_NUMBER}
       />
 
       {/* Order Success & WhatsApp Forward Modal */}
@@ -483,8 +467,8 @@ export default function App() {
         waUrl={activeWaUrl}
         isQrisPaid={isQrisPaid}
         totalAmount={totalAmount}
-        affiliatorName={selectedAffiliator.name}
-        affiliatorPhone={selectedAffiliator.phone}
+        affiliatorName={customerInfo.affiliatorName || "Iket Ijo Bintaro"}
+        affiliatorPhone={WHATSAPP_NUMBER}
       />
 
       {/* Price Tiers Modal */}
