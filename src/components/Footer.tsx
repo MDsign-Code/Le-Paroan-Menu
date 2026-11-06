@@ -39,39 +39,27 @@ export const Footer: React.FC = () => {
             </div>
           </div>
 
-          {/* Quick Links */}
+          {/* SESI GASTRONOMI Section exactly from screenshot */}
           <div className="md:col-span-3 space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-stone-400">
-              Sesi Gastronomi
+            <h4 className="text-xs font-black uppercase tracking-wider text-stone-300">
+              SESI GASTRONOMI
             </h4>
-            <ul className="space-y-2 text-xs">
-              <li>
-                <a href="#sarapan" className="hover:text-[#E86014] transition-colors">
-                  01. Sarapan (06:00 - 10:00 WIB)
-                </a>
-              </li>
-              <li>
-                <a href="#siang" className="hover:text-[#E86014] transition-colors">
-                  02. Makan Siang (11:00 - 14:30 WIB)
-                </a>
-              </li>
-              <li>
-                <a href="#malam" className="hover:text-[#E86014] transition-colors">
-                  03. Makan Malam (17:00 - 21:00 WIB)
-                </a>
-              </li>
-              <li className="text-[#E86014] font-medium pt-1">
+            <div className="space-y-2 text-xs text-stone-300">
+              <p className="font-semibold text-white">01. Sarapan (06:00 - 10:00 WIB)</p>
+              <p className="font-semibold text-white">02. Makan Siang (11:00 - 14:30 WIB)</p>
+              <p className="font-semibold text-white">03. Makan Malam (17:00 - 21:00 WIB)</p>
+              <p className="text-[#E86014] font-bold pt-2">
                 Komposisi Harga: 20K Base • 28K Premium
-              </li>
-            </ul>
+              </p>
+            </div>
           </div>
 
-          {/* Contact & Hours */}
+          {/* LAYANAN & AFILIATOR BINTARO */}
           <div className="md:col-span-4 space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-stone-400">
-              Layanan &amp; Afiliator Bintaro
+            <h4 className="text-xs font-black uppercase tracking-wider text-stone-300">
+              LAYANAN &amp; AFILIATOR BINTARO
             </h4>
-            <div className="space-y-2 text-xs text-stone-400">
+            <div className="space-y-2.5 text-xs text-stone-300">
               <div className="flex items-center gap-2">
                 <PhoneCall className="w-4 h-4 text-emerald-400 shrink-0" />
                 <span>
@@ -94,7 +82,7 @@ export const Footer: React.FC = () => {
                 <Clock className="w-4 h-4 text-stone-400 shrink-0" />
                 <span>Layanan: Setiap Hari, 06.00 – 21.00 WIB</span>
               </div>
-              <p className="text-[11px] text-stone-500 italic pt-1">
+              <p className="text-[11px] text-stone-400 italic pt-1">
                 Format Chat: Nama Afiliator - Menu - Jam Antar - Alamat
               </p>
             </div>

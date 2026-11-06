@@ -250,39 +250,19 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                       />
                     </div>
 
-                    {/* 1 Nama Afiliator */}
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <label className="text-xs font-semibold text-stone-700 flex items-center gap-1.5">
-                          <UserCheck className="w-3.5 h-3.5 text-[#E86014]" />
-                          <span>Nama Afiliator</span>
-                        </label>
-                        <span className="text-[10px] text-stone-400 font-medium">1 Nama Afiliator</span>
-                      </div>
-                      <input
-                        type="text"
-                        placeholder="Iket Ijo Bintaro (atau nama agen pengundang Anda)"
-                        value={customerInfo.affiliatorName}
-                        onChange={(e) =>
-                          onUpdateCustomerInfo({ affiliatorName: e.target.value })
-                        }
-                        className="w-full px-3 py-2 text-xs bg-stone-50 border border-stone-200 rounded-lg text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-[#E86014]"
-                      />
-                      <p className="text-[10px] text-stone-500 mt-1">
-                        Format chat WhatsApp: <em>{customerInfo.affiliatorName || 'Iket Ijo Bintaro'} - Menu - Jam Antar</em>
-                      </p>
-                    </div>
-
-                    {/* Target WhatsApp Info */}
-                    <div className="p-3 bg-emerald-50/70 border border-emerald-200 rounded-xl flex items-center justify-between text-xs">
-                      <div>
-                        <span className="text-[10px] uppercase font-bold text-emerald-800 block">Tujuan Pesanan</span>
-                        <span className="font-bold text-stone-900">WhatsApp Resmi Dapur Le'Paroan</span>
-                      </div>
-                      <span className="font-mono font-bold text-emerald-700 bg-white px-2 py-0.5 rounded border border-emerald-200">
-                        {WHATSAPP_NUMBER}
-                      </span>
-                    </div>
+                    {/* Form Pilihan Afiliator A sampai C */}
+                    <AffiliatorSelector
+                      affiliators={affiliators}
+                      selectedAffiliator={selectedAffiliator}
+                      onSelectAffiliator={(aff) => {
+                        onSelectAffiliator(aff);
+                        onUpdateCustomerInfo({
+                          affiliatorName: aff.name,
+                          affiliatorPhone: aff.phone,
+                        });
+                      }}
+                      onOpenManageModal={onOpenManageAffiliators}
+                    />
 
                     {/* WhatsApp Phone */}
                     <div>
@@ -479,8 +459,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
                 <div className="text-right text-[11px] text-stone-400">
                   Direct WhatsApp ke:<br />
-                  <span className="font-semibold text-emerald-600 font-mono">
-                    {WHATSAPP_NUMBER}
+                  <span className="font-semibold text-emerald-700 font-mono">
+                    {selectedAffiliator.name} ({selectedAffiliator.phone})
                   </span>
                 </div>
               </div>

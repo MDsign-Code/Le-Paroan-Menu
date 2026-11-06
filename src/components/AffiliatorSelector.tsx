@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserCheck, Phone, MapPin, ChevronDown, Settings2, Share2 } from 'lucide-react';
+import { UserCheck, Phone, MapPin, ChevronDown, Settings2, CheckCircle2, Sparkles } from 'lucide-react';
 import { Affiliator } from '../data/affiliatorsData';
 
 interface AffiliatorSelectorProps {
@@ -35,11 +35,11 @@ export const AffiliatorSelector: React.FC<AffiliatorSelectorProps> = ({
   }
 
   return (
-    <div className="p-3.5 bg-white border border-[#E8DFD3] rounded-2xl space-y-2.5 shadow-2xs">
+    <div className="p-4 bg-white border border-[#E8DFD3] rounded-2xl space-y-3 shadow-2xs">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-500">
-          <UserCheck className="w-3.5 h-3.5 text-emerald-600" />
-          <span>Tujuan WhatsApp Afiliator / Agen</span>
+        <div className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-[#0E3A2F]">
+          <UserCheck className="w-4 h-4 text-emerald-600" />
+          <span>Pilihan Afiliator WhatsApp (A s/d C)</span>
         </div>
 
         <button
@@ -48,11 +48,42 @@ export const AffiliatorSelector: React.FC<AffiliatorSelectorProps> = ({
           className="inline-flex items-center gap-1 text-[11px] font-bold text-[#E86014] hover:text-[#D0520E] cursor-pointer"
         >
           <Settings2 className="w-3 h-3" />
-          <span>Kelola / Tambah Agen</span>
+          <span>Kelola / No. WA</span>
         </button>
       </div>
 
-      {/* Select Dropdown / Quick Switch */}
+      {/* Pilihan 3 Tombol Cepat: Afiliator A, Afiliator B, Afiliator C */}
+      <div className="grid grid-cols-3 gap-2">
+        {affiliators.slice(0, 3).map((aff) => {
+          const isSelected = selectedAffiliator.id === aff.id;
+          return (
+            <button
+              key={aff.id}
+              type="button"
+              onClick={() => onSelectAffiliator(aff)}
+              className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-1 relative ${
+                isSelected
+                  ? 'bg-emerald-50 border-[#0E3A2F] ring-2 ring-[#0E3A2F]/20 shadow-xs'
+                  : 'bg-stone-50 hover:bg-stone-100 border-stone-200 text-stone-700'
+              }`}
+            >
+              {isSelected && (
+                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[#0E3A2F] text-white flex items-center justify-center text-[10px]">
+                  ✓
+                </span>
+              )}
+              <span className={`text-xs font-black block leading-none ${isSelected ? 'text-[#0E3A2F]' : 'text-stone-800'}`}>
+                {aff.name}
+              </span>
+              <span className="text-[10px] font-mono text-stone-500 block truncate max-w-full px-1">
+                {aff.phone}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Dropdown untuk daftar lengkap / custom */}
       <div className="relative">
         <select
           value={selectedAffiliator.id}
@@ -60,26 +91,34 @@ export const AffiliatorSelector: React.FC<AffiliatorSelectorProps> = ({
             const found = affiliators.find((a) => a.id === e.target.value);
             if (found) onSelectAffiliator(found);
           }}
-          className="w-full appearance-none px-3.5 py-2.5 bg-[#FAF7F2] border border-stone-300 rounded-xl text-xs font-bold text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#E86014]/30 focus:border-[#E86014] cursor-pointer pr-8"
+          className="w-full appearance-none px-3.5 py-2 bg-[#FAF7F2] border border-stone-300 rounded-xl text-xs font-bold text-stone-900 focus:outline-none focus:ring-2 focus:ring-[#0E3A2F]/30 focus:border-[#0E3A2F] cursor-pointer pr-8"
         >
           {affiliators.map((aff) => (
             <option key={aff.id} value={aff.id}>
-              [{aff.code}] {aff.name} — {aff.phone} ({aff.area})
+              {aff.name} — WA: {aff.phone} ({aff.area})
             </option>
           ))}
         </select>
         <ChevronDown className="w-4 h-4 text-stone-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
       </div>
 
-      {/* Active Details Card */}
-      <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-[11px] text-stone-600 bg-emerald-50/50 p-2.5 rounded-xl border border-emerald-100">
-        <div className="flex items-center gap-1.5 text-emerald-800 font-semibold font-mono">
-          <Phone className="w-3 h-3 text-emerald-600" />
-          <span>Nomor WA: {selectedAffiliator.phone}</span>
+      {/* Detail Afiliator Terpilih */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 bg-emerald-50/70 border border-emerald-200 rounded-xl text-xs">
+        <div className="flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
+          <div>
+            <span className="font-bold text-stone-900 block leading-tight">
+              Tujuan: {selectedAffiliator.name}
+            </span>
+            <span className="text-[11px] text-stone-600">
+              Wilayah: {selectedAffiliator.area}
+            </span>
+          </div>
         </div>
-        <div className="flex items-center gap-1 text-stone-500">
-          <MapPin className="w-3 h-3 text-stone-400" />
-          <span>Wilayah: {selectedAffiliator.area}</span>
+
+        <div className="font-mono font-bold text-[#0E3A2F] flex items-center gap-1.5 self-end sm:self-auto">
+          <Phone className="w-3.5 h-3.5 text-emerald-600" />
+          <span>{selectedAffiliator.phone}</span>
         </div>
       </div>
     </div>

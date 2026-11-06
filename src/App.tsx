@@ -1,39 +1,44 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
-import { MealFilterToolbar } from './components/MealFilterToolbar';
 import { MenuCard } from './components/MenuCard';
 import { CartDrawer } from './components/CartDrawer';
 import { QrisModal } from './components/QrisModal';
 import { OrderSuccessModal } from './components/OrderSuccessModal';
 import { PriceTiersModal } from './components/PriceTiersModal';
-import { OrderingGuideSection } from './components/OrderingGuideSection';
 import { AffiliatorModal } from './components/AffiliatorModal';
+import { SesiGastronomiBar } from './components/SesiGastronomiBar';
+import { QrisPaymentSection } from './components/QrisPaymentSection';
 import { Footer } from './components/Footer';
-import { MENU_ITEMS, MenuItem, MealTime, PriceTier, BRAND_NAME, BRAND_LOCATION, WHATSAPP_NUMBER } from './data/menuData';
+import {
+  MENU_ITEMS,
+  MenuItem,
+  DayKey,
+  DAYS_SCHEDULE,
+  BRAND_NAME,
+  BRAND_LOCATION,
+  WHATSAPP_NUMBER,
+} from './data/menuData';
 import {
   Affiliator,
   getStoredAffiliators,
   saveStoredAffiliators,
   getInitialSelectedAffiliator,
-  STORAGE_KEY_SELECTED_AFF,
 } from './data/affiliatorsData';
 import { CartItem, OrderCustomerInfo } from './types/order';
 import { generateOrderId, buildWhatsAppMessage, getWhatsAppUrl } from './utils/whatsappHelper';
 import { formatRupiah } from './utils/qrisGenerator';
-import { ShoppingBag, ArrowRight, FilterX, Clock, Star, Phone, UserCheck, CheckCircle2 } from 'lucide-react';
+import { ShoppingBag, ArrowRight, Calendar, Search, Sparkles } from 'lucide-react';
 
 export default function App() {
-  // Filter states
-  const [selectedMeal, setSelectedMeal] = useState<MealTime | 'all'>('all');
-  const [selectedTier, setSelectedTier] = useState<PriceTier | 'all'>('all');
+  // Day filter state: 'all' or 'senin', 'selasa', etc.
+  const [selectedDay, setSelectedDay] = useState<DayKey | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  // Multi-Affiliator State
+  // Affiliators State (Afiliator A sampai C)
   const [affiliators, setAffiliators] = useState<Affiliator[]>(() => getStoredAffiliators());
   const [selectedAffiliator, setSelectedAffiliator] = useState<Affiliator>(() => getInitialSelectedAffiliator());
   const [isAffiliatorModalOpen, setIsAffiliatorModalOpen] = useState<boolean>(false);
-  const [affiliatorToast, setAffiliatorToast] = useState<string | null>(null);
 
   // Cart & Order State
   const [cartItems, setCartItems] = useState<CartItem[]>(() => {
@@ -46,15 +51,15 @@ export default function App() {
   });
 
   const [customerInfo, setCustomerInfo] = useState<OrderCustomerInfo>(() => {
-    const initAff = getInitialSelectedAffiliator();
+    const initialAff = getInitialSelectedAffiliator();
     try {
-      const saved = localStorage.getItem('dlp_bintaro_customer');
+      const saved = localStorage.getItem('dlp_bintaro_customer_v6');
       if (saved) {
         const parsed = JSON.parse(saved);
         return {
           ...parsed,
-          affiliatorName: parsed.affiliatorName || 'Iket Ijo Bintaro',
-          affiliatorPhone: WHATSAPP_NUMBER,
+          affiliatorName: parsed.affiliatorName || initialAff.name,
+          affiliatorPhone: parsed.affiliatorPhone || initialAff.phone,
         };
       }
     } catch {
@@ -62,8 +67,8 @@ export default function App() {
     }
     return {
       name: '',
-      affiliatorName: 'Iket Ijo Bintaro',
-      affiliatorPhone: WHATSAPP_NUMBER,
+      affiliatorName: initialAff.name,
+      affiliatorPhone: initialAff.phone,
       phone: '',
       method: 'delivery',
       address: '',
@@ -74,36 +79,32 @@ export default function App() {
     };
   });
 
-  // Check URL referral on initial mount for toast
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const affParam = params.get('aff') || params.get('agen') || params.get('afiliator');
-      if (affParam) {
-        setAffiliatorToast(`Anda memesan melalui ${selectedAffiliator.name}`);
-        const timer = setTimeout(() => setAffiliatorToast(null), 5000);
-        return () => clearTimeout(timer);
-      }
-    }
-  }, [selectedAffiliator]);
-
-  // Keep customerInfo in sync with selectedAffiliator
-  useEffect(() => {
-    if (selectedAffiliator) {
-      setCustomerInfo((prev) => ({
-        ...prev,
-        affiliatorId: selectedAffiliator.id,
-        affiliatorName: selectedAffiliator.name,
-        affiliatorPhone: selectedAffiliator.phone,
-      }));
-    }
-  }, [selectedAffiliator]);
-
   // Modals state
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
   const [isPriceTiersOpen, setIsPriceTiersOpen] = useState<boolean>(false);
   const [isQrisOpen, setIsQrisOpen] = useState<boolean>(false);
   const [isOrderSuccessOpen, setIsOrderSuccessOpen] = useState<boolean>(false);
+
+  // Switch / Select Affiliator (A, B, C)
+  const handleSelectAffiliator = (aff: Affiliator) => {
+    setSelectedAffiliator(aff);
+    setCustomerInfo((prev) => ({
+      ...prev,
+      affiliatorName: aff.name,
+      affiliatorPhone: aff.phone,
+    }));
+  };
+
+  const handleSaveAffiliators = (updated: Affiliator[]) => {
+    setAffiliators(updated);
+    saveStoredAffiliators(updated);
+    const stillActive = updated.find((a) => a.id === selectedAffiliator.id);
+    if (stillActive) {
+      setSelectedAffiliator(stillActive);
+    } else if (updated.length > 0) {
+      handleSelectAffiliator(updated[0]);
+    }
+  };
 
   // Active Order Details
   const [activeOrderId, setActiveOrderId] = useState<string>('');
@@ -122,32 +123,11 @@ export default function App() {
 
   useEffect(() => {
     try {
-      localStorage.setItem('dlp_bintaro_customer', JSON.stringify(customerInfo));
+      localStorage.setItem('dlp_bintaro_customer_v6', JSON.stringify(customerInfo));
     } catch (e) {
       // ignore
     }
   }, [customerInfo]);
-
-  // Handle affiliator selection
-  const handleSelectAffiliator = (aff: Affiliator) => {
-    setSelectedAffiliator(aff);
-    try {
-      localStorage.setItem(STORAGE_KEY_SELECTED_AFF, aff.id);
-    } catch (e) {
-      // ignore
-    }
-    setCustomerInfo((prev) => ({
-      ...prev,
-      affiliatorId: aff.id,
-      affiliatorName: aff.name,
-      affiliatorPhone: aff.phone,
-    }));
-  };
-
-  const handleSaveAffiliators = (updatedList: Affiliator[]) => {
-    setAffiliators(updatedList);
-    saveStoredAffiliators(updatedList);
-  };
 
   // Add Item to Cart
   const handleAddToCart = (item: MenuItem, quantity: number) => {
@@ -209,39 +189,38 @@ export default function App() {
     [cartItems]
   );
 
-  // Filtered menu items
-  const filteredMenuItems = useMemo(() => {
-    return MENU_ITEMS.filter((item) => {
-      // Meal filter
-      if (selectedMeal !== 'all') {
-        if (item.mealTime !== selectedMeal) {
-          return false;
-        }
-      }
+  // Filter Days schedule based on selectedDay & search query
+  const displayedSchedule = useMemo(() => {
+    let days = DAYS_SCHEDULE;
+    if (selectedDay !== 'all') {
+      days = days.filter((d) => d.key === selectedDay);
+    }
 
-      // Tier filter
-      if (selectedTier !== 'all') {
-        if (item.tier !== selectedTier) {
-          return false;
-        }
-      }
+    if (!searchQuery.trim()) {
+      return days;
+    }
 
-      // Search filter
-      if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase();
-        const matchesName = item.name.toLowerCase().includes(query);
-        const matchesCode = item.code.toLowerCase().includes(query);
-        const matchesDesc = item.description.toLowerCase().includes(query);
-        const matchesComp = item.composition.toLowerCase().includes(query);
-        const matchesTag = item.tag.toLowerCase().includes(query);
-        if (!matchesName && !matchesCode && !matchesDesc && !matchesComp && !matchesTag) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-  }, [selectedMeal, selectedTier, searchQuery]);
+    const q = searchQuery.toLowerCase();
+    // Filter days that contain matched meals
+    return days
+      .map((day) => {
+        const matchingMeals = day.meals.filter((m) => {
+          const item = MENU_ITEMS.find((it) => it.id === m.itemId);
+          if (!item) return false;
+          return (
+            item.name.toLowerCase().includes(q) ||
+            item.code.toLowerCase().includes(q) ||
+            item.tag.toLowerCase().includes(q) ||
+            m.headerLabel.toLowerCase().includes(q)
+          );
+        });
+        return {
+          ...day,
+          meals: matchingMeals,
+        };
+      })
+      .filter((day) => day.meals.length > 0);
+  }, [selectedDay, searchQuery]);
 
   // Proceed to QRIS
   const handleProceedToQris = () => {
@@ -264,7 +243,8 @@ export default function App() {
       true
     );
     setActiveWaMessage(msg);
-    const targetUrl = getWhatsAppUrl(msg, WHATSAPP_NUMBER);
+    const targetPhone = selectedAffiliator?.phone || WHATSAPP_NUMBER;
+    const targetUrl = getWhatsAppUrl(msg, targetPhone);
     setActiveWaUrl(targetUrl);
     setIsOrderSuccessOpen(true);
 
@@ -291,7 +271,8 @@ export default function App() {
       false
     );
     setActiveWaMessage(msg);
-    const targetUrl = getWhatsAppUrl(msg, WHATSAPP_NUMBER);
+    const targetPhone = selectedAffiliator?.phone || WHATSAPP_NUMBER;
+    const targetUrl = getWhatsAppUrl(msg, targetPhone);
     setActiveWaUrl(targetUrl);
     setIsOrderSuccessOpen(true);
 
@@ -309,99 +290,156 @@ export default function App() {
         cartCount={cartTotalItems}
         onOpenCart={() => setIsCartOpen(true)}
         onOpenPriceTiers={() => setIsPriceTiersOpen(true)}
+        selectedAffiliator={selectedAffiliator}
+        onOpenAffiliatorModal={() => setIsAffiliatorModalOpen(true)}
       />
 
       {/* Main Content Area */}
       <main className="flex-1">
-        {/* Editorial Hero Section */}
+        {/* Header Bersih: Logo & Nama Dapur Le'Paroan Iket Ijo Bintaro (Font Hijau/Hitam) */}
         <Hero
-          onOpenPriceTiers={() => setIsPriceTiersOpen(true)}
+          selectedDay={selectedDay}
+          onSelectDay={setSelectedDay}
         />
 
-        {/* Meal & Tier Filter Toolbar */}
-        <section id="menu-section">
-          <MealFilterToolbar
-            selectedMeal={selectedMeal}
-            onSelectMeal={setSelectedMeal}
-            selectedTier={selectedTier}
-            onSelectTier={setSelectedTier}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-          />
-        </section>
+        {/* SESI GASTRONOMI: 01. Sarapan (06-10), 02. Siang (11-14:30), 03. Malam (17-21) */}
+        <SesiGastronomiBar />
 
-        {/* 21 Menu Showcase Grid */}
-        <section className="py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Section Menu Pilihan Terjadwal (Senin s/d Minggu) */}
+        <section id="jadwal-harian" className="py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           
-          {/* Active Filter Headline */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
-            <div>
-              <div className="text-xs uppercase tracking-wider font-bold text-[#E86014]">
-                {BRAND_NAME} • {BRAND_LOCATION}
+          {/* Quick Search & Count Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3.5 sm:p-4 rounded-2xl border border-[#E8DFD3] shadow-2xs">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-[#0E3A2F]" />
+              <div>
+                <span className="text-xs sm:text-sm font-extrabold text-[#0E3A2F] block">
+                  Jadwal Menu Pilihan Harian
+                </span>
+                <span className="text-[11px] text-stone-500">
+                  {selectedDay === 'all' ? 'Menampilkan Senin s/d Minggu' : `Menampilkan Hari ${selectedDay.toUpperCase()}`}
+                </span>
               </div>
-              <h2 className="text-xl sm:text-2xl font-black text-stone-900 tracking-tight mt-0.5">
-                {selectedMeal === 'all'
-                  ? 'Katalog 21 Pilihan Menu Harian'
-                  : selectedMeal === 'sarapan'
-                  ? '07 Menu Sarapan (Gastronomi Pagi • 06:00-10:00)'
-                  : selectedMeal === 'siang'
-                  ? '07 Menu Makan Siang (Pegawai & Mahasiswa • 11:00-14:30)'
-                  : selectedMeal === 'malam'
-                  ? '07 Menu Makan Malam (Rumah Tangga & Apartemen • 17:00-21:00)'
-                  : 'Minuman Khas Rempah'}
-              </h2>
-              <p className="text-xs text-stone-500 mt-1">
-                Porsi lengkap, hangat, siap antar Bintaro &amp; sekitarnya • Fresh Cooked Daily
-              </p>
             </div>
 
-            <div className="flex items-center gap-2 self-start sm:self-auto">
-              <div className="text-xs text-stone-600 font-semibold bg-white px-3 py-2 rounded-xl border border-[#E8DFD3] shadow-2xs">
-                <span className="font-bold text-[#E86014] font-mono">{filteredMenuItems.length}</span> Menu Tersedia
-              </div>
+            {/* Simple Search Input */}
+            <div className="relative min-w-[220px] sm:min-w-[260px]">
+              <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Cari soto, rendang, bubur, iga..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-3 py-1.5 text-xs bg-stone-50 border border-stone-200 rounded-lg text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-[#0E3A2F]"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-stone-400 hover:text-stone-600"
+                >
+                  ✕
+                </button>
+              )}
             </div>
           </div>
 
-          {/* Cards Grid */}
-          {filteredMenuItems.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredMenuItems.map((item) => (
-                <MenuCard
-                  key={item.id}
-                  item={item}
-                  onAddToCart={handleAddToCart}
-                />
+          {/* Susunan Menu Per Hari (Senin, Selasa, Rabu, Kamis, Jumat, Sabtu, Minggu) */}
+          {displayedSchedule.length > 0 ? (
+            <div className="space-y-12">
+              {displayedSchedule.map((day) => (
+                <div key={day.key} id={day.key} className="space-y-4 pt-2">
+                  
+                  {/* Judul Hari (Senin / Selasa / dst) */}
+                  <div className="flex items-center justify-between border-b-2 border-[#0E3A2F]/20 pb-2.5">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-[#0E3A2F] text-white flex items-center justify-center font-black text-sm shadow-xs">
+                        {day.name.slice(0, 3)}
+                      </div>
+                      <div>
+                        <h2 className="text-xl sm:text-2xl font-black text-[#0E3A2F] tracking-tight">
+                          {day.name}
+                        </h2>
+                        <span className="text-[11px] text-stone-500">
+                          3 Pilihan Terjadwal (Sarapan, Makan Siang, Makan Malam)
+                        </span>
+                      </div>
+                    </div>
+
+                    <span className="text-xs font-mono font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-xl shadow-2xs">
+                      Tersedia
+                    </span>
+                  </div>
+
+                  {/* 3 Gambar Menu Terjadwal (Sarapan, Makan Siang, Makan Malam) */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    {day.meals.map((meal) => {
+                      const item = MENU_ITEMS.find((it) => it.id === meal.itemId);
+                      if (!item) return null;
+                      return (
+                        <MenuCard
+                          key={item.id}
+                          item={item}
+                          overrideSlotLabel={meal.headerLabel}
+                          onAddToCart={handleAddToCart}
+                        />
+                      );
+                    })}
+                  </div>
+
+                </div>
               ))}
             </div>
           ) : (
-            <div className="bg-white border border-[#E8DFD3] rounded-3xl p-12 text-center space-y-4 max-w-md mx-auto">
-              <div className="w-12 h-12 rounded-2xl bg-stone-100 text-stone-400 flex items-center justify-center mx-auto">
-                <FilterX className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-stone-900">
-                  Tidak Ada Menu yang Sesuai
-                </h3>
-                <p className="text-xs text-stone-500 mt-1">
-                  Coba sesuaikan kata kunci pencarian atau reset filter harga.
-                </p>
-              </div>
-              <button
-                onClick={() => {
-                  setSelectedMeal('all');
-                  setSelectedTier('all');
-                  setSearchQuery('');
-                }}
-                className="px-4 py-2 text-xs font-semibold text-white bg-[#E86014] rounded-xl hover:bg-[#D0520E] transition-colors cursor-pointer"
-              >
-                Reset Semua Filter
-              </button>
+            <div className="p-8 text-center bg-white rounded-2xl border border-stone-200 text-stone-500 text-xs">
+              Tidak ada menu yang sesuai dengan pencarian Anda.
             </div>
           )}
+
+          {/* Minuman Khas Nusantara (Setiap Hari) */}
+          <div className="pt-8 border-t border-stone-200/80">
+            <div className="mb-4">
+              <span className="text-[10px] font-bold text-amber-800 uppercase tracking-widest bg-amber-100/70 px-2.5 py-0.5 rounded-md">
+                Minuman Pendamping
+              </span>
+              <h3 className="text-lg font-black text-[#0E3A2F] mt-1">
+                Teh Rempah Le'Paroan (Tersedia Setiap Hari)
+              </h3>
+              <p className="text-xs text-stone-500">
+                Pilihan Varian Serai Segar atau Rempah Pokak Hangat (5K)
+              </p>
+            </div>
+
+            <div className="max-w-md">
+              {(() => {
+                const tehItem = MENU_ITEMS.find((it) => it.id === 'teh-rempah');
+                if (!tehItem) return null;
+                return (
+                  <MenuCard
+                    item={tehItem}
+                    overrideSlotLabel="Minuman Khas (Setiap Hari)"
+                    onAddToCart={handleAddToCart}
+                  />
+                );
+              })()}
+            </div>
+          </div>
+
         </section>
 
-        {/* WhatsApp & QRIS Ordering Guide */}
-        <OrderingGuideSection />
+        {/* BAYAR DISINI 👇 Gambar QRIS / Keranjang */}
+        <QrisPaymentSection
+          cartItems={cartItems}
+          totalAmount={totalAmount}
+          customerInfo={customerInfo}
+          onUpdateCustomerInfo={handleUpdateCustomerInfo}
+          onOpenCart={() => setIsCartOpen(true)}
+          onProceedToQris={handleProceedToQris}
+          affiliators={affiliators}
+          selectedAffiliator={selectedAffiliator}
+          onSelectAffiliator={handleSelectAffiliator}
+          onOpenManageModal={() => setIsAffiliatorModalOpen(true)}
+        />
       </main>
 
       {/* Footer */}
@@ -412,10 +450,10 @@ export default function App() {
         <div className="md:hidden fixed bottom-4 inset-x-4 z-40 animate-in slide-in-from-bottom-4 duration-200">
           <button
             onClick={() => setIsCartOpen(true)}
-            className="w-full bg-[#E86014] text-white p-3.5 rounded-2xl shadow-xl flex items-center justify-between font-semibold text-sm active:scale-98 transition-all cursor-pointer border border-[#D0520E]"
+            className="w-full bg-[#0E3A2F] text-white p-3.5 rounded-2xl shadow-xl flex items-center justify-between font-semibold text-sm active:scale-98 transition-all cursor-pointer border border-emerald-950/40"
           >
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-full bg-white text-[#E86014] flex items-center justify-center text-xs font-bold font-mono">
+              <div className="w-7 h-7 rounded-full bg-white text-[#0E3A2F] flex items-center justify-center text-xs font-bold font-mono">
                 {cartTotalItems}
               </div>
               <span>Lihat Keranjang</span>
@@ -444,7 +482,7 @@ export default function App() {
         affiliators={affiliators}
         selectedAffiliator={selectedAffiliator}
         onSelectAffiliator={handleSelectAffiliator}
-        onOpenManageAffiliators={() => {}}
+        onOpenManageAffiliators={() => setIsAffiliatorModalOpen(true)}
       />
 
       {/* QRIS Payment Modal */}
@@ -454,8 +492,8 @@ export default function App() {
         orderId={activeOrderId}
         totalAmount={totalAmount}
         onConfirmQrisPaid={handleConfirmQrisPaid}
-        affiliatorName="Dapur Le'Paroan Pusat"
-        affiliatorPhone={WHATSAPP_NUMBER}
+        affiliatorName={selectedAffiliator.name}
+        affiliatorPhone={selectedAffiliator.phone}
       />
 
       {/* Order Success & WhatsApp Forward Modal */}
@@ -467,17 +505,11 @@ export default function App() {
         waUrl={activeWaUrl}
         isQrisPaid={isQrisPaid}
         totalAmount={totalAmount}
-        affiliatorName={customerInfo.affiliatorName || "Iket Ijo Bintaro"}
-        affiliatorPhone={WHATSAPP_NUMBER}
+        affiliatorName={selectedAffiliator.name}
+        affiliatorPhone={selectedAffiliator.phone}
       />
 
-      {/* Price Tiers Modal */}
-      <PriceTiersModal
-        isOpen={isPriceTiersOpen}
-        onClose={() => setIsPriceTiersOpen(false)}
-      />
-
-      {/* Affiliators Manager Modal */}
+      {/* Modal Kelola Afiliator WhatsApp */}
       <AffiliatorModal
         isOpen={isAffiliatorModalOpen}
         onClose={() => setIsAffiliatorModalOpen(false)}
@@ -485,6 +517,12 @@ export default function App() {
         selectedAffiliator={selectedAffiliator}
         onSelectAffiliator={handleSelectAffiliator}
         onSaveAffiliators={handleSaveAffiliators}
+      />
+
+      {/* Price Tiers Modal */}
+      <PriceTiersModal
+        isOpen={isPriceTiersOpen}
+        onClose={() => setIsPriceTiersOpen(false)}
       />
     </div>
   );

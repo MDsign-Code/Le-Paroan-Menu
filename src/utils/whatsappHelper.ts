@@ -23,7 +23,8 @@ export function buildWhatsAppMessage(
   // Build menu summary line for standard chat format: Nama Afiliator - Menu - Jam Antar
   const menuSummary = items.map((i) => `${i.quantity}x ${i.item.name}`).join(', ');
   const jamAntar = customer.orderTime || 'Segera';
-  const namaAfiliator = customer.affiliatorName?.trim() || 'Iket Ijo Bintaro';
+  const hasAfiliator = Boolean(customer.affiliatorName?.trim());
+  const namaAfiliator = hasAfiliator ? customer.affiliatorName!.trim() : 'Dapur Pusat (Tanpa Afiliator)';
 
   const lines: string[] = [
     `*PESANAN MENU HARIAN - ${BRAND_NAME}*`,
@@ -31,11 +32,11 @@ export function buildWhatsAppMessage(
     `No. Pesanan: *#${orderId}*`,
     `Waktu Pesan: ${new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })} WIB`,
     ``,
-    `*FORMAT CHAT AFILIATOR:*`,
-    `*${namaAfiliator} - ${menuSummary} - ${jamAntar}*`,
+    `*FORMAT CHAT:*`,
+    `*${hasAfiliator ? `${namaAfiliator} - ` : ''}${menuSummary} - ${jamAntar}*`,
     ``,
     `*RINCIAN PEMESANAN:*`,
-    `• *Nama Afiliator*: *${namaAfiliator}*`,
+    `• *Kolom Afiliator*: *${hasAfiliator ? namaAfiliator : '(Dikosongkan)'}*`,
     `• *Nama Pemesan*: ${customer.name || '-'}`,
     `• *No. WhatsApp Pemesan*: ${customer.phone || '-'}`,
     `• *Jam Antar / Ambil*: ${jamAntar}`,

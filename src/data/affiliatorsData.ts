@@ -7,38 +7,31 @@ export interface Affiliator {
   isDefault?: boolean;
 }
 
-export const STORAGE_KEY_AFFILIATORS = 'dlp_affiliators_list_v2';
-export const STORAGE_KEY_SELECTED_AFF = 'dlp_selected_aff_id_v2';
+export const STORAGE_KEY_AFFILIATORS = 'dlp_affiliators_list_v6';
+export const STORAGE_KEY_SELECTED_AFF = 'dlp_selected_aff_id_v6';
 
 export const INITIAL_AFFILIATORS: Affiliator[] = [
   {
-    id: 'pusat',
-    code: 'PUSAT',
-    name: 'Admin Dapur Pusat (Iket Ijo Bintaro)',
-    phone: '085964245547',
-    area: 'Pusat Bintaro & Seluruh Area Antar',
+    id: 'aff-a',
+    code: 'AFF-A',
+    name: 'Afiliator A',
+    phone: '0123456789',
+    area: 'Belum di tentukan',
     isDefault: true,
   },
   {
-    id: 'aff-sektor9',
-    code: 'AFF-01',
-    name: 'Afiliator Bu Ratna (Sektor 7, 8, 9)',
-    phone: '081298765432',
-    area: 'Sektor 7, 8, 9, Emerald & Discovery',
+    id: 'aff-b',
+    code: 'AFF-B',
+    name: 'Afiliator B',
+    phone: '0123456789',
+    area: 'Belum di tentukan',
   },
   {
-    id: 'aff-plaza',
-    code: 'AFF-02',
-    name: 'Agen Bintaro Plaza & Pondok Ranji (Pak Dedi)',
-    phone: '081387654321',
-    area: 'Bintaro Plaza, Sektor 1 - 3, Pondok Ranji',
-  },
-  {
-    id: 'aff-graha',
-    code: 'AFF-03',
-    name: 'Afiliator Graha Raya & CBD (Mba Sari)',
-    phone: '081987654321',
-    area: 'Graha Raya, Silkwood, CBD Bintaro',
+    id: 'aff-c',
+    code: 'AFF-C',
+    name: 'Afiliator C',
+    phone: '0123456789',
+    area: 'Belum di tentukan',
   },
 ];
 
