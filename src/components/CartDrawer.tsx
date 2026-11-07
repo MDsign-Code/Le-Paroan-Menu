@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CartItem, OrderCustomerInfo, PaymentMethod, OrderMethod } from '../types/order';
 import { formatRupiah } from '../utils/qrisGenerator';
-import { X, Trash2, ShoppingBag, ArrowRight, QrCode, Banknote, Sparkles, AlertCircle, UserCheck, Calendar, Clock } from 'lucide-react';
+import { X, Trash2, ShoppingBag, ArrowRight, QrCode, Banknote, Sparkles, AlertCircle, UserCheck, Calendar, Clock, XCircle } from 'lucide-react';
 import { WHATSAPP_NUMBER } from '../data/menuData';
 import { MENU_IMAGES } from '../data/menuImages';
 import { Affiliator } from '../data/affiliatorsData';
@@ -285,47 +285,38 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                       <div className="flex items-center justify-between mb-1.5">
                         <label className="text-xs font-bold text-stone-800 flex items-center gap-1.5">
                           <Calendar className="w-3.5 h-3.5 text-[#0E3A2F]" />
-                          <span>Layanan Pengantaran</span>
+                          <span>Layanan Waktu Pengantaran</span>
                         </label>
-                        <span className="text-[10px] font-bold text-amber-800 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-md">
-                          Fresh Cooked Daily
+                        <span className="text-[10px] font-black text-amber-900 bg-amber-200 border border-amber-300 px-2 py-0.5 rounded-md uppercase">
+                          Wajib Pesan H-1
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2">
-                        {/* Option 1: Hari Ini */}
-                        <button
-                          type="button"
-                          onClick={() => onUpdateCustomerInfo({ deliveryTiming: 'hari-ini' })}
-                          className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-1 ${
-                            customerInfo.deliveryTiming === 'hari-ini'
-                              ? 'bg-emerald-50 border-[#0E3A2F] ring-1 ring-[#0E3A2F]/30 text-[#0E3A2F]'
-                              : 'bg-stone-50 border-stone-200 text-stone-700 hover:border-stone-300'
-                          }`}
+                      {/* Pill Pilihan Waktu Pengantaran */}
+                      <div className="space-y-2">
+                        {/* Option: Pesan Antar H-1 (Pilihan Resmi Utama) */}
+                        <div
+                          className="p-3 rounded-2xl border-2 border-emerald-700 bg-emerald-50/90 text-[#0E3A2F] flex flex-col gap-1.5 shadow-2xs"
                         >
                           <div className="flex items-center justify-between">
-                            <span className="text-xs font-bold">🛵 Antar Hari Ini</span>
-                            {customerInfo.deliveryTiming === 'hari-ini' && <span className="text-xs font-bold">✓</span>}
+                            <span className="text-xs font-black text-emerald-950 flex items-center gap-1.5">
+                              <Sparkles className="w-4 h-4 text-emerald-700" />
+                              <span>⭐ PESAN ANTAR H-1 (PRE-ORDER RESMI)</span>
+                            </span>
+                            <span className="text-[10px] bg-emerald-700 text-white font-black px-2 py-0.5 rounded-md uppercase tracking-wider">
+                              ✓ AKTIF
+                            </span>
                           </div>
-                          <span className="text-[10px] text-stone-500">Kirim di sesi aktif hari ini</span>
-                        </button>
+                          <p className="text-[11px] text-emerald-900 leading-snug">
+                            Pesanan dimasak 100% segar subuh besok pagi khusus untuk Anda &amp; dikirim tepat waktu di sesi yang dipilih (Sarapan / Siang / Malam).
+                          </p>
+                        </div>
 
-                        {/* Option 2: Pesan Antar H-1 */}
-                        <button
-                          type="button"
-                          onClick={() => onUpdateCustomerInfo({ deliveryTiming: 'h-min-1' })}
-                          className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-1 ${
-                            customerInfo.deliveryTiming === 'h-min-1'
-                              ? 'bg-amber-50 border-amber-600 ring-2 ring-amber-500/30 text-amber-950'
-                              : 'bg-stone-50 border-stone-200 text-stone-700 hover:border-stone-300'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs font-black text-amber-900">⭐ Pesan Antar H-1</span>
-                            {customerInfo.deliveryTiming === 'h-min-1' && <span className="text-xs text-amber-700 font-bold">✓</span>}
-                          </div>
-                          <span className="text-[10px] text-amber-800 font-medium">Pre-order untuk besok</span>
-                        </button>
+                        {/* Notice Same-Day Ditutup */}
+                        <div className="px-3 py-1.5 bg-red-50 border border-red-200 rounded-xl text-[10px] text-red-700 font-bold flex items-center gap-1.5">
+                          <XCircle className="w-3.5 h-3.5 text-red-600 shrink-0" />
+                          <span>Pemesanan Hari H (Same Day) Ditutup demi menjaga kesegaran masakan.</span>
+                        </div>
                       </div>
 
                       {/* Info & Input tanggal bila H-1 aktif */}

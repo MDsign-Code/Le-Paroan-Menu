@@ -8,6 +8,7 @@ import { OrderSuccessModal } from './components/OrderSuccessModal';
 import { PriceTiersModal } from './components/PriceTiersModal';
 import { AffiliatorModal } from './components/AffiliatorModal';
 import { SesiGastronomiBar } from './components/SesiGastronomiBar';
+import { PesanAntarH1PolicyBanner } from './components/PesanAntarH1PolicyBanner';
 import { QrisPaymentSection } from './components/QrisPaymentSection';
 import { Footer } from './components/Footer';
 import {
@@ -28,12 +29,21 @@ import {
 import { CartItem, OrderCustomerInfo } from './types/order';
 import { generateOrderId, buildWhatsAppMessage, getWhatsAppUrl } from './utils/whatsappHelper';
 import { formatRupiah } from './utils/qrisGenerator';
-import { ShoppingBag, ArrowRight, Calendar, Search, Sparkles } from 'lucide-react';
+import { ShoppingBag, ArrowRight, Calendar, Search, Sparkles, XCircle, Check } from 'lucide-react';
 
 export default function App() {
   // Day filter state: 'all' or 'senin', 'selasa', etc.
   const [selectedDay, setSelectedDay] = useState<DayKey | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // Deteksi Hari Ini (Hari H) secara dinamis
+  const getRealTodayKey = (): DayKey => {
+    const dayIndex = new Date().getDay(); // 0: Minggu, 1: Senin, 2: Selasa, 3: Rabu, 4: Kamis, 5: Jumat, 6: Sabtu
+    const map: DayKey[] = ['minggu', 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'];
+    return map[dayIndex];
+  };
+
+  const [currentTodayKey, setCurrentTodayKey] = useState<DayKey>(() => getRealTodayKey());
 
   // Affiliators State (Afiliator A sampai C)
   const [affiliators, setAffiliators] = useState<Affiliator[]>(() => getStoredAffiliators());
@@ -312,6 +322,12 @@ export default function App() {
         {/* Section Menu Pilihan Terjadwal (Senin s/d Minggu) */}
         <section id="jadwal-harian" className="py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           
+          {/* Naskah Ketentuan Resmi & Penegasan Pesan Antar H-1 */}
+          <PesanAntarH1PolicyBanner
+            currentTodayKey={currentTodayKey}
+            onSetSimulatedToday={setCurrentTodayKey}
+          />
+
           {/* Quick Search & Count Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3.5 sm:p-4 rounded-2xl border border-[#E8DFD3] shadow-2xs">
             <div className="flex items-center gap-2">
@@ -351,48 +367,86 @@ export default function App() {
           {/* Susunan Menu Per Hari (Senin, Selasa, Rabu, Kamis, Jumat, Sabtu, Minggu) */}
           {displayedSchedule.length > 0 ? (
             <div className="space-y-12">
-              {displayedSchedule.map((day) => (
-                <div key={day.key} id={day.key} className="space-y-4 pt-2">
-                  
-                  {/* Judul Hari (Senin / Selasa / dst) */}
-                  <div className="flex items-center justify-between border-b-2 border-[#0E3A2F]/20 pb-2.5">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-[#0E3A2F] text-white flex items-center justify-center font-black text-sm shadow-xs">
-                        {day.name.slice(0, 3)}
+              {displayedSchedule.map((day) => {
+                const isHariH = day.key === currentTodayKey;
+
+                return (
+                  <div key={day.key} id={day.key} className="space-y-4 pt-2">
+                    
+                    {/* Judul Hari (Senin / Selasa / dst) */}
+                    <div className="flex items-center justify-between border-b-2 border-[#0E3A2F]/20 pb-2.5">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-9 h-9 rounded-xl text-white flex items-center justify-center font-black text-sm shadow-xs ${
+                          isHariH ? 'bg-red-600 ring-2 ring-red-300' : 'bg-[#0E3A2F]'
+                        }`}>
+                          {day.name.slice(0, 3)}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h2 className="text-xl sm:text-2xl font-black text-[#0E3A2F] tracking-tight">
+                              {day.name}
+                            </h2>
+                            {isHariH && (
+                              <span className="text-[10px] font-black uppercase tracking-wider bg-red-600 text-white px-2 py-0.5 rounded-md shadow-2xs">
+                                HARI INI (HARI H)
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-[11px] text-stone-500">
+                            3 Pilihan Terjadwal (Sarapan, Makan Siang, Makan Malam)
+                          </span>
+                        </div>
                       </div>
-                      <div>
-                        <h2 className="text-xl sm:text-2xl font-black text-[#0E3A2F] tracking-tight">
-                          {day.name}
-                        </h2>
-                        <span className="text-[11px] text-stone-500">
-                          3 Pilihan Terjadwal (Sarapan, Makan Siang, Makan Malam)
+
+                      {/* Status Tag: Jika Hari H -> (TERSEDIA) ✕ DITUTUP DI HARI H */}
+                      {isHariH ? (
+                        <span className="inline-flex items-center gap-1.5 text-xs font-mono font-black text-red-700 bg-red-50 border-2 border-red-300 px-3 py-1 rounded-xl shadow-2xs">
+                          <XCircle className="w-3.5 h-3.5 text-red-600" />
+                          <span>(TERSEDIA) ✕ DITUTUP DI HARI H</span>
                         </span>
-                      </div>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-xl shadow-2xs">
+                          <Check className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>✓ TERSEDIA (PESAN H-1)</span>
+                        </span>
+                      )}
                     </div>
 
-                    <span className="text-xs font-mono font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-xl shadow-2xs">
-                      Tersedia
-                    </span>
-                  </div>
+                    {/* Alert Khusus jika Hari H: Menegaskan Terprogram Tidak Bisa Klik */}
+                    {isHariH && (
+                      <div className="bg-red-50/95 border-l-4 border-red-600 p-3 sm:p-4 rounded-r-2xl flex items-start gap-3 text-xs text-red-950 shadow-2xs">
+                        <XCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+                        <div className="space-y-1">
+                          <p className="font-black text-red-800 text-xs sm:text-sm">
+                            ⚠️ HARI INI ({day.name.toUpperCase()} / HARI H) — SELURUH MENU TIDAK BISA DIKLIK!
+                          </p>
+                          <p className="text-red-700 text-[11px] sm:text-xs leading-relaxed">
+                            Sistem mengunci pemesanan menu hari ini dan status tombol berubah menjadi <strong>(Tersedia) ✕</strong> demi menjamin masakan dibuat segar 100% dari subuh. Kami tidak melayani pesanan hari H (same day). Silakan pilih dan pesan menu untuk hari esok atau hari berikutnya (Minimal H-1).
+                          </p>
+                        </div>
+                      </div>
+                    )}
 
-                  {/* 3 Gambar Menu Terjadwal (Sarapan, Makan Siang, Makan Malam) */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    {day.meals.map((meal) => {
-                      const item = MENU_ITEMS.find((it) => it.id === meal.itemId);
-                      if (!item) return null;
-                      return (
-                        <MenuCard
-                          key={item.id}
-                          item={item}
-                          overrideSlotLabel={meal.headerLabel}
-                          onAddToCart={handleAddToCart}
-                        />
-                      );
-                    })}
-                  </div>
+                    {/* 3 Gambar Menu Terjadwal (Sarapan, Makan Siang, Makan Malam) */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                      {day.meals.map((meal) => {
+                        const item = MENU_ITEMS.find((it) => it.id === meal.itemId);
+                        if (!item) return null;
+                        return (
+                          <MenuCard
+                            key={item.id}
+                            item={item}
+                            overrideSlotLabel={meal.headerLabel}
+                            onAddToCart={handleAddToCart}
+                            isLockedHariH={isHariH}
+                          />
+                        );
+                      })}
+                    </div>
 
-                </div>
-              ))}
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <div className="p-8 text-center bg-white rounded-2xl border border-stone-200 text-stone-500 text-xs">
