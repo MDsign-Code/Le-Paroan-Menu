@@ -26,6 +26,11 @@ export function buildWhatsAppMessage(
   const hasAfiliator = Boolean(customer.affiliatorName?.trim());
   const namaAfiliator = hasAfiliator ? customer.affiliatorName!.trim() : 'Dapur Pusat (Tanpa Afiliator)';
 
+  const isH1 = customer.deliveryTiming === 'h-min-1';
+  const layananText = isH1
+    ? `⭐ PESAN ANTAR H-1 (Pre-order Besok${customer.deliveryDateH1 ? ` · ${customer.deliveryDateH1}` : ''})`
+    : '🛵 Antar Hari Ini';
+
   const lines: string[] = [
     `*PESANAN MENU HARIAN - ${BRAND_NAME}*`,
     `📍 *${BRAND_LOCATION}* (Harga Kaki 5 • Penyajian Bintang 5)`,
@@ -33,9 +38,10 @@ export function buildWhatsAppMessage(
     `Waktu Pesan: ${new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })} WIB`,
     ``,
     `*FORMAT CHAT:*`,
-    `*${hasAfiliator ? `${namaAfiliator} - ` : ''}${menuSummary} - ${jamAntar}*`,
+    `*${isH1 ? '[PESAN ANTAR H-1] ' : ''}${hasAfiliator ? `${namaAfiliator} - ` : ''}${menuSummary} - ${jamAntar}*`,
     ``,
     `*RINCIAN PEMESANAN:*`,
+    `• *Layanan Waktu*: *${layananText}*`,
     `• *Kolom Afiliator*: *${hasAfiliator ? namaAfiliator : '(Dikosongkan)'}*`,
     `• *Nama Pemesan*: ${customer.name || '-'}`,
     `• *No. WhatsApp Pemesan*: ${customer.phone || '-'}`,

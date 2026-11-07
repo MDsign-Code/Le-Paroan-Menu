@@ -60,6 +60,8 @@ export default function App() {
           ...parsed,
           affiliatorName: parsed.affiliatorName || initialAff.name,
           affiliatorPhone: parsed.affiliatorPhone || initialAff.phone,
+          deliveryTiming: parsed.deliveryTiming || 'hari-ini',
+          deliveryDateH1: parsed.deliveryDateH1 || 'Besok',
         };
       }
     } catch {
@@ -71,6 +73,8 @@ export default function App() {
       affiliatorPhone: initialAff.phone,
       phone: '',
       method: 'delivery',
+      deliveryTiming: 'hari-ini',
+      deliveryDateH1: 'Besok',
       address: '',
       orderMealTime: 'semua',
       orderTime: '',

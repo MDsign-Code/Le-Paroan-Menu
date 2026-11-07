@@ -30,9 +30,12 @@ export const Hero: React.FC<HeroProps> = ({ selectedDay, onSelectDay }) => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-[11px] font-bold text-stone-700 bg-white border border-[#E8DFD3] px-3 py-1.5 rounded-xl shadow-2xs font-mono">
               21 Menu Terjadwal (Senin – Minggu)
+            </span>
+            <span className="text-[11px] font-extrabold text-amber-900 bg-amber-50 border border-amber-300 px-3 py-1.5 rounded-xl shadow-2xs flex items-center gap-1">
+              <span>⭐ Pesan Antar H-1</span>
             </span>
           </div>
         </div>

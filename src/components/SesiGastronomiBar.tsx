@@ -80,6 +80,23 @@ export const SesiGastronomiBar: React.FC = () => {
 
         </div>
 
+        {/* Banner Layanan Pesan Antar H-1 */}
+        <div className="mt-4 pt-3.5 border-t border-[#E8DFD3]/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-1 bg-[#0E3A2F] text-amber-300 rounded-lg text-[10px] font-black uppercase tracking-wider shadow-2xs flex items-center gap-1">
+              <Sparkles className="w-3 h-3 text-amber-400" />
+              <span>LAYANAN H-1</span>
+            </span>
+            <span className="text-xs sm:text-sm font-black text-[#0E3A2F]">
+              Melayani Pesan Antar Hari Ini &amp; Pesan Antar H-1
+            </span>
+          </div>
+
+          <p className="text-[11px] sm:text-xs text-stone-600 font-medium">
+            Pre-order hari ini untuk pengantaran terjadwal besok (Sarapan 05-07 · Siang 11-13 · Malam 17-19) — Fresh Cooked Daily.
+          </p>
+        </div>
+
       </div>
     </section>
   );

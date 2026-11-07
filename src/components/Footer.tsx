@@ -30,7 +30,7 @@ export const Footer: React.FC = () => {
             </div>
 
             <p className="text-xs text-stone-400 leading-relaxed max-w-sm">
-              Menu Harian Nusantara 21 Pilihan: Sarapan (06-10), Makan Siang (11-14:30), dan Makan Malam (17-21). Porsi lengkap, hangat, siap antar Bintaro &amp; sekitarnya.
+              Menu Harian Nusantara 21 Pilihan: Sarapan (06-10), Makan Siang (11-14:30), dan Makan Malam (17-21). Melayani Antar Hari Ini &amp; <strong className="text-amber-400">Pesan Antar H-1</strong> Bintaro &amp; sekitarnya.
             </p>
 
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-stone-800 rounded-lg border border-stone-700 text-[11px] text-stone-300">

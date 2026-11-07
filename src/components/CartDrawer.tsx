@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CartItem, OrderCustomerInfo, PaymentMethod, OrderMethod } from '../types/order';
 import { formatRupiah } from '../utils/qrisGenerator';
-import { X, Trash2, ShoppingBag, ArrowRight, QrCode, Banknote, Sparkles, AlertCircle, UserCheck } from 'lucide-react';
+import { X, Trash2, ShoppingBag, ArrowRight, QrCode, Banknote, Sparkles, AlertCircle, UserCheck, Calendar, Clock } from 'lucide-react';
 import { WHATSAPP_NUMBER } from '../data/menuData';
 import { MENU_IMAGES } from '../data/menuImages';
 import { Affiliator } from '../data/affiliatorsData';
@@ -278,6 +278,83 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                         }
                         className="w-full px-3 py-2 text-xs bg-stone-50 border border-stone-200 rounded-lg text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-[#E86014]"
                       />
+                    </div>
+
+                    {/* Layanan Waktu Pengantaran (Hari Ini vs Pesan Antar H-1) */}
+                    <div className="pt-1">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="text-xs font-bold text-stone-800 flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5 text-[#0E3A2F]" />
+                          <span>Layanan Pengantaran</span>
+                        </label>
+                        <span className="text-[10px] font-bold text-amber-800 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded-md">
+                          Fresh Cooked Daily
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        {/* Option 1: Hari Ini */}
+                        <button
+                          type="button"
+                          onClick={() => onUpdateCustomerInfo({ deliveryTiming: 'hari-ini' })}
+                          className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-1 ${
+                            customerInfo.deliveryTiming === 'hari-ini'
+                              ? 'bg-emerald-50 border-[#0E3A2F] ring-1 ring-[#0E3A2F]/30 text-[#0E3A2F]'
+                              : 'bg-stone-50 border-stone-200 text-stone-700 hover:border-stone-300'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold">🛵 Antar Hari Ini</span>
+                            {customerInfo.deliveryTiming === 'hari-ini' && <span className="text-xs font-bold">✓</span>}
+                          </div>
+                          <span className="text-[10px] text-stone-500">Kirim di sesi aktif hari ini</span>
+                        </button>
+
+                        {/* Option 2: Pesan Antar H-1 */}
+                        <button
+                          type="button"
+                          onClick={() => onUpdateCustomerInfo({ deliveryTiming: 'h-min-1' })}
+                          className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-1 ${
+                            customerInfo.deliveryTiming === 'h-min-1'
+                              ? 'bg-amber-50 border-amber-600 ring-2 ring-amber-500/30 text-amber-950'
+                              : 'bg-stone-50 border-stone-200 text-stone-700 hover:border-stone-300'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-black text-amber-900">⭐ Pesan Antar H-1</span>
+                            {customerInfo.deliveryTiming === 'h-min-1' && <span className="text-xs text-amber-700 font-bold">✓</span>}
+                          </div>
+                          <span className="text-[10px] text-amber-800 font-medium">Pre-order untuk besok</span>
+                        </button>
+                      </div>
+
+                      {/* Info & Input tanggal bila H-1 aktif */}
+                      {customerInfo.deliveryTiming === 'h-min-1' && (
+                        <div className="mt-2.5 p-3 bg-amber-50/90 border border-amber-300 rounded-xl space-y-2 text-xs animate-in fade-in duration-200">
+                          <div className="flex items-start gap-2">
+                            <Sparkles className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                            <div>
+                              <span className="font-bold text-amber-950 block">Layanan Pesan Antar H-1 Aktif</span>
+                              <p className="text-[11px] text-amber-900 leading-relaxed mt-0.5">
+                                Menu Anda disiapkan segar keesokan harinya dan dikirim tepat waktu di sesi pilihan Anda (Sarapan 05-07 / Siang 11-13 / Malam 17-19).
+                              </p>
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="text-[11px] font-bold text-amber-950 block mb-1">
+                              Rencana Tanggal / Hari Antar H-1:
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="Contoh: Besok Pagi (Sarapan jam 06.30 WIB)"
+                              value={customerInfo.deliveryDateH1 || ''}
+                              onChange={(e) => onUpdateCustomerInfo({ deliveryDateH1: e.target.value })}
+                              className="w-full px-3 py-1.5 text-xs bg-white border border-amber-300 rounded-lg text-stone-900 placeholder-amber-900/40 focus:outline-none focus:ring-1 focus:ring-amber-600 font-medium"
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Order Delivery Method */}

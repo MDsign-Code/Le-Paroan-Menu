@@ -234,6 +234,44 @@ export const QrisPaymentSection: React.FC<QrisPaymentSectionProps> = ({
                 </div>
               )}
 
+              {/* Pilihan Layanan: Antar Hari Ini vs Pesan Antar H-1 */}
+              <div className="bg-white border border-[#E8DFD3] rounded-2xl p-3.5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-stone-800">
+                    Layanan Pengantaran:
+                  </span>
+                  <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">
+                    {customerInfo.deliveryTiming === 'h-min-1' ? 'Pesan Antar H-1 (Pre-order Besok)' : 'Antar Hari Ini'}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => onUpdateCustomerInfo({ deliveryTiming: 'hari-ini' })}
+                    className={`py-2 px-3 rounded-xl border font-bold transition-all cursor-pointer text-center ${
+                      customerInfo.deliveryTiming === 'hari-ini'
+                        ? 'bg-emerald-50 border-[#0E3A2F] text-[#0E3A2F] ring-1 ring-[#0E3A2F]/20'
+                        : 'bg-stone-50 border-stone-200 text-stone-600 hover:bg-stone-100'
+                    }`}
+                  >
+                    🛵 Antar Hari Ini
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => onUpdateCustomerInfo({ deliveryTiming: 'h-min-1' })}
+                    className={`py-2 px-3 rounded-xl border font-black transition-all cursor-pointer text-center ${
+                      customerInfo.deliveryTiming === 'h-min-1'
+                        ? 'bg-amber-50 border-amber-600 text-amber-950 ring-2 ring-amber-500/20'
+                        : 'bg-stone-50 border-stone-200 text-stone-600 hover:bg-stone-100'
+                    }`}
+                  >
+                    ⭐ Pesan Antar H-1
+                  </button>
+                </div>
+              </div>
+
               {/* Form Pilihan Afiliator A sampai C */}
               <AffiliatorSelector
                 affiliators={affiliators}
